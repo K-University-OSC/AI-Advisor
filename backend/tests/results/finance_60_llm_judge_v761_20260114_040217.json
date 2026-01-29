@@ -1,0 +1,465 @@
+{
+  "test_date": "2026-01-14T04:02:17.803439",
+  "collection": "mh_rag_finance_v7_6_azure",
+  "version": "advisor V7.6.1",
+  "evaluation_method": "LLM-as-Judge",
+  "judges": [
+    "GPT-4o-mini",
+    "Gemini-2.0-Flash"
+  ],
+  "config": {
+    "top_k": 10,
+    "rerank_top_k": 30,
+    "use_multi_query": false
+  },
+  "summary": {
+    "total": 60,
+    "gpt4o_mini": {
+      "correct": 0,
+      "accuracy": 0.0
+    },
+    "gemini_flash": {
+      "correct": 0,
+      "accuracy": 0.0
+    },
+    "by_type": {
+      "paragraph": {
+        "total": 30,
+        "gpt4o_mini": 0,
+        "gemini_flash": 0
+      },
+      "table": {
+        "total": 10,
+        "gpt4o_mini": 0,
+        "gemini_flash": 0
+      },
+      "image": {
+        "total": 20,
+        "gpt4o_mini": 0,
+        "gemini_flash": 0
+      }
+    }
+  },
+  "results": [
+    {
+      "idx": 1,
+      "question": "시중은행, 지방은행, 인터넷은행의 인가 요건 및 절차에 차이가 있는데 그 차이점은 무엇인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 2,
+      "question": "은행업을 신청하고자 할 때, 은행법상 소유규제에 부합하는 대주주 요건을 충족하려면 어떤 서류를 제출해야하는지와 그 외 대주주 요건에서 지켜야 할 항목은 무엇인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 3,
+      "question": "본인가를 받으려는 지방은행이 시중은행 전환시 예비인가를 받을 필요가 있는지 설명하시오. 그리고 예비인가를 받지 않는다면 그 이유는 무엇인지 설명하시오.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 4,
+      "question": "은행법에 의거 예비인가를 신청할 수 있는지와, 그 경우 금융위원회가 검토했어야 하는 요건은 무엇인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 5,
+      "question": "2019년 YTD 기준으로 브라질의 주식 시장 수익률과 베트남의 주식 시장 수익률 사이에 어떤 차이가 있었나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 6,
+      "question": "바이오주 주가 급락에 따른 셀트리온의 주가 변동률과, 현대차, 삼성전자, 신한지주의 상승률, 그리고 POSCO와 LG화학의 하락률을 각각 말해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 7,
+      "question": "미국, 중국, 한국에 대한 성과 및 주식시장 선호도의 예상 순서는 어떻게 됩니까?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 8,
+      "question": "2001~2002년과 2008~2009년 중 어떤 기간의 경제 상황이 더 안 좋았는지 그 이유와 함께 설명해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 9,
+      "question": "1995년에 연방 기준 금리가 하락한 후 S&P 500 지수와 10년물 미국 국채 금리는 각각 어떤 변화를 보였는지 설명하시오.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 10,
+      "question": "2019년 영업이익과 순이익 각각이 2017년 대비 감소한 비율은 얼마나 되는가?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 11,
+      "question": "투자 매력도 상위 국가들의 공통점은 무엇인가?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 12,
+      "question": "실질금리란 무엇이며 실질금리와 설비투자의 관계에 대해 설명해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 13,
+      "question": "2012년 2월부터 신탁은행이 취급하기 시작한 새로운 상품의 명칭과 이 상품의 출시 배경에 대해 설명하세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 14,
+      "question": "2002년과 2012년에 걸쳐 변액연금 잔고와 월지급식 펀드 순자산이 어떠한 추세를 보였으며, 이를 통해 어떠한 경제적 판단을 내릴 수 있는지 설명하세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 15,
+      "question": "가입기간에 따라 연금 수급액이 어떻게 차등 지급되며, 이를 보완하기 위해 검토 중인 방안에는 어떤 것들이 있나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 16,
+      "question": "2012년 대비 2025년에 지급비 합계는 얼마나 증가할 것으로 예상되며, 그중에서 의료비가 차지하는 비율은 얼마인가?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 17,
+      "question": "고령자의 의료 확보에 관한 법률 시행령과 시행규칙, 이와 관련된 교부금 및 국고부담금 산정에 관한 정부령은 언제 발표되었나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 18,
+      "question": "2005년에 일본에서 제정된 고령화 대책법은 어떤 것들이 있나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 19,
+      "question": "간병 종사자 등의 인재확보를 위한 처우개선에 관한 법률은 언제 제정되었고, 그 법률번호는 무엇인가?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 20,
+      "question": "1994년부터 2001년까지 고령사회 대책과 관련하여 가장 먼저 이루어진 이벤트와 그 연도와 마지막으로 이루어진 이벤트와 그 연도는 무엇인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 21,
+      "question": "1996년, 2001년, 2012년의 대책대강에서 공통적으로 포함되어 있던 고령자의 취업에 관련된 주요 항목들과 그 변화에 대해 서술하시오.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 22,
+      "question": "정부, 기업, 금융산업이 협력하여 녹색금융을 확대 및 활성화함으로써 얻을 수 있는 세 가지 이점에는 무엇이 있는지 상세히 설명하시오.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 23,
+      "question": "주요국들이 지구 평균기온 상승폭을 1.5oC 이내로 억제하기 위한 노력을 강화함에 따라 필요한 탄소배출량 감축 목표는 무엇이며, 그 기한은 언제인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 24,
+      "question": "PRI, PSI, PRB에서 각각 공통적으로 강조하는 활동은 무엇이며, 이들 원칙에서 각각 독특하게 강조하는 핵심 사항에는 어떤 것들이 있나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 25,
+      "question": "TCFD의 '전략' 핵심요소는 어떤 기후변화 시나리오를 고려하면서 잠재적 재무 리스크를 파악하며, 그 리스크는 어떤 종류로 나눌 수 있나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 26,
+      "question": "기후위기 그린뉴딜 기본법과 녹색금융 특별법에서 주요하게 다룬 내용은 무엇이며, 이를 실행하기 위해 어떠한 협력체나 조직이 관련되어 있는지 각각 설명해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 27,
+      "question": "녹색금융 실행계획의 세 가지 목표를 각각 달성하기 위해 어떠한 구체적인 계획이 마련되어 있는지 설명해보세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 28,
+      "question": "2030년까지 친환경 산업 확대를 통해 창출될 수 있는 일자리와 예상되는 매출은 어느 정도인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 29,
+      "question": "금융 회사가 이행리스크 분석을 위해 PCAF의 기준을 활용하여 탄소 배출량을 정량화하고, 이후 과학기반 탄소중립 목표를 설정하는 과정을 설명하실 수 있나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 30,
+      "question": "PCAF는 2020년 11월에 어떤 지침서를 제공했고, 그 지침서에 기반한 금융자산을 분류하는 방법은 무엇인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 31,
+      "question": "2023년 4/4분기 중에 한국은행이 유동성조절을 위해 취한 대응책들에는 어떤 것들이 있으며, 그 결과로 이루어진 지준공급의 변화는 어떤 모습이었나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 32,
+      "question": "2024년도 한국은행의 대정부 일시대출금 한도와 대출조건을 결정하는 과정에서 보완된 대출 부대조건에 대해 설명하시오.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 33,
+      "question": "공개시장운영 대상기관으로 선정된 자산운용사가 본격적으로 작동하게 된다면, 초단기금리의 안정에 어떻게 기여할 것이라 예상되는지 설명해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 34,
+      "question": "RP매매 시 대상증권의 배정 방식 개선과 이를 통한 운영리스크 축소 및 대상증권 활용도 제고 방안에 대해 설명하시오.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 35,
+      "question": "2024년 한국의 GDP 성장률 전망과 주요 영향 요인들에 대해 설명해 주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 36,
+      "question": "지난 2024년 2월에 기록된 소비자물가지수의 품목별 인플레이션 분포에서 1분위와 3분위의 수치는 각각 어떻게 되며, 이를 바탕으로 그 사분위거리를 계산하면 어떤 값이 나옵니까?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 37,
+      "question": "2023년에 각국에서 실행된 시장왜곡 가능성 있는 산업정책 중에서 영향 받는 품목을 특정할 수 있는 정책의 수와 그러한 품목들이 차지하는 글로벌 교역 비중은 어떻게 되나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 38,
+      "question": "비은행 금융기관의 부동산 PF 대출 연체율 상승에 따른 미래적 영향은 무엇이며, 어떤 부문에 큰 영향이 예상되는가?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 39,
+      "question": "미 연준은 어떠한 이유로 인해 금리인하를 결정하기에는 이른 시점이라고 평가하였나요? 또한 미 연준의 대차대조표 축소 정책에 대한 현재의 방침과 앞으로의 논의 방향은 어떠한가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 40,
+      "question": "특정 국가의 중앙은행들이 인플레이션 둔화에 대응하려 정책금리 동결을 결정했다고 본문에서 언급되어 있는데, 이들 국가들의 이름과 그와 관련된 주요 근거는 무엇인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 41,
+      "question": "지방은행에서 시중은행으로의 전환 시 대법원의 처분 관련 선례가 어떻게 적용되는지, 그리고 이에 따른 심사 절차의 필요성에 대해 설명해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 42,
+      "question": "은행업 인가의 경우 예비인가를 거치는 이유와, 정상적으로 은행업을 영위하고 있는 지방은행이 시중은행으로 전환하려 할 때 예비인가의 필요성에 대해 설명해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 43,
+      "question": "상생금융 과제 중 보험업권에서 중점적으로 추진하는 프로그램의 특징과 그로 인한 사회적 효과는 무엇인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 44,
+      "question": "보험업권이 2024년상반기에 출시한 '보험소비자 민생안정특약'과 관련해 설명할 수 있는 내용은 무엇이며, 이와 별개로 '보험계약대출의 이자 납입유예'에 대한 신청이 가능한 경우는 어떤 경우인가?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 45,
+      "question": "은행권 상생금융과 여전업권 상생금융에서 가장 많은 지원을 받은 주요 내용은 무엇이며, 그 지원 규모는 각각 얼마인가?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 46,
+      "question": "2024년 2월까지의 보험업권 상생금융의 지원실적은 얼마인가?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 47,
+      "question": "저금리 대환 프로그램' 확대 개편의 주요 내용 중, 대출금리 인하의 최대 범위와 그 기간은 어떻게 되나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 48,
+      "question": "핀테크 혁신펀드 투자로 기업가치가 크게 성장한 회사들의 예시와 그 성장 배율을 구체적으로 말해줄 수 있나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 49,
+      "question": "핀테크 혁신펀드 운용을 통해 기대되는 효과는 무엇인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 50,
+      "question": "핀테크 혁신펀드 1호가 운용된 기간과 그 기간 동안의 투자 목표 금액, 실제 조성된 금액, 투자 완료된 금액은 각각 얼마인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 51,
+      "question": "현행 계약형 퇴직연금제도와 기금형 퇴직연금제도의 주요 차이점은 무엇인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 52,
+      "question": "한국에서 퇴직연금제도가 시작된 유래가 어떠하며, DB제도와 DC제도가 기업과 노동자에게 어떠한 영향을 미치는지 설명해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 53,
+      "question": "Garry Weaven이 속한 조직의 이름은 무엇인가요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 54,
+      "question": "5년, 10년, 15년 국채 금리를 비교했을 때, 가장 금리가 높게 측정된 국가와 그 금리를 특정 기간 별로 나열해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 55,
+      "question": "1년, 3년, 5년, 10년 동안의 산업형기금, 기업형기금, 공적기금의 수익률을 비교했을 때, 어떤 기간 동안 어느 연금이 가장 높은 수익률을 보이는지 설명할 수 있나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 56,
+      "question": "호주의 성공적인 연금 시스템이 강조하는 네 가지 요인 중, 동기와 문화를 활용하여 회원들에게 어떤 방식으로 순 혜택을 제공하나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 57,
+      "question": "기존 퇴직금, DB연금, DC연금, 해외 전통 DB의 파산위험 절연에 대해 설명해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 58,
+      "question": "DB연금과 해외 전통 DB의 차이점은 무엇이며, 각각의 기업 부담총액 계산 방식을 설명해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 59,
+      "question": "100인 이하 근로자를 고용하는 사업체의 전체 근로자와 대비하여 가입 대상 근로자 수의 비율은 어떻게 되나요?",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    },
+    {
+      "idx": 60,
+      "question": "DB, DC, CDC 연금 제도의 위험 유형은 무엇이며, 각각의 위험부담 내용을 비교해주세요.",
+      "error": "All connection attempts failed",
+      "gpt4o_mini_verdict": "X",
+      "gemini_verdict": "X"
+    }
+  ]
+}

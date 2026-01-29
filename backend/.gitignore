@@ -1,0 +1,5 @@
+
+# Sensitive env files
+.env
+.env.*
+!.env.example

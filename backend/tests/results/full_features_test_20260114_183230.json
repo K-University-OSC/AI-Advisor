@@ -1,0 +1,44 @@
+{
+  "test_time": "2026-01-14T18:32:23.409212",
+  "tests": [
+    {
+      "name": "Health Check",
+      "passed": true,
+      "details": "status=healthy, rag_based=True"
+    },
+    {
+      "name": "Signup",
+      "passed": true,
+      "details": "user=test_user_183223"
+    },
+    {
+      "name": "Login",
+      "passed": true,
+      "details": "token obtained (len=211)"
+    },
+    {
+      "name": "File Upload",
+      "passed": true,
+      "details": "response=['id', 'filename', 'original_filename', 'file_type', 'file_size', 'session_id']"
+    },
+    {
+      "name": "RAG Chat",
+      "passed": true,
+      "details": "response_length=27132"
+    },
+    {
+      "name": "Search",
+      "passed": false,
+      "details": "status=500"
+    },
+    {
+      "name": "Sessions List",
+      "passed": true,
+      "details": "sessions=0"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1
+  }
+}
