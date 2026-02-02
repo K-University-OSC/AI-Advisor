@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 # PostgreSQL 연결 설정
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@localhost:5434/llm_chatbot"
+    "postgresql+asyncpg://advisor:***REMOVED***@localhost:10312/advisor_osc_db"
 )
 
 # 커넥션 풀 설정

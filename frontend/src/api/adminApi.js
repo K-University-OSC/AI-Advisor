@@ -61,6 +61,11 @@ export const isAdminLoggedIn = () => {
     return !!getAdminToken() && !!getAdmin();
 };
 
+// Aliases for backward compatibility
+export const getTenantAdmin = getAdmin;
+export const tenantAdminLogout = adminLogout;
+export const isTenantAdminLoggedIn = isAdminLoggedIn;
+
 // ============================================================================
 // 관리자 대시보드 API
 // ============================================================================
@@ -108,6 +113,12 @@ export const getCosts = async (days = 30) => {
     if (!response.ok) throw new Error('비용 분석 로드 실패');
     return response.json();
 };
+
+// Aliases for backward compatibility
+export const getTenantAdminDashboard = getAdminDashboard;
+export const getTenantUsagePatterns = getUsagePatterns;
+export const getTenantTopUsers = getTopUsers;
+export const getTenantCosts = getCosts;
 
 // ============================================================================
 // 사용자 관리 API
@@ -165,6 +176,100 @@ export const activateUser = async (userId) => {
     return response.json();
 };
 
+export const createUser = async (userData) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify(userData)
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '사용자 생성 실패');
+    }
+    return response.json();
+};
+
+export const createUsersBulk = async (users) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/users/bulk`, {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({ users })
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '일괄 사용자 생성 실패');
+    }
+    return response.json();
+};
+
+export const deleteUser = async (userId) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '사용자 삭제 실패');
+    }
+    return response.json();
+};
+
+// Aliases for compatibility
+export const getTenantUsers = getUsers;
+export const suspendTenantUser = suspendUser;
+export const activateTenantUser = activateUser;
+export const createTenantUser = createUser;
+export const createTenantUsersBulk = createUsersBulk;
+export const deleteTenantUser = deleteUser;
+
+// ============================================================================
+// 관리자 관리 API
+// ============================================================================
+
+export const getAdmins = async () => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/admins`, {
+        headers: getAdminHeaders()
+    });
+
+    if (!response.ok) throw new Error('관리자 목록 로드 실패');
+    return response.json();
+};
+
+export const createAdmin = async (adminData) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/admins`, {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify(adminData)
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '관리자 생성 실패');
+    }
+    return response.json();
+};
+
+export const deleteAdmin = async (userId) => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/admins/${userId}`, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '관리자 삭제 실패');
+    }
+    return response.json();
+};
+
+// Aliases for compatibility
+export const getTenantAdmins = getAdmins;
+export const createTenantAdmin = createAdmin;
+export const deleteTenantAdmin = deleteAdmin;
+
 // ============================================================================
 // 시스템 설정 API
 // ============================================================================
@@ -190,11 +295,30 @@ export const updateSystemSettings = async (settings) => {
 };
 
 // ============================================================================
-// 데이터 관리 API
+// 데이터 관리 API (문서)
 // ============================================================================
 
-export const getDocuments = async () => {
-    const response = await fetch(`${API_BASE_URL}/api/admin/data/documents`, {
+// 데이터 통계
+export const getDataStats = async () => {
+    const response = await fetch(`${API_BASE_URL}/api/admin/data/stats`, {
+        headers: getAdminHeaders()
+    });
+
+    if (!response.ok) {
+        if (response.status === 401) throw new Error('인증 필요');
+        if (response.status === 403) throw new Error('관리자 권한 필요');
+        throw new Error('데이터 통계 로드 실패');
+    }
+
+    return response.json();
+};
+
+// 문서 관리
+export const getDocuments = async (page = 1, limit = 50, status = null) => {
+    let url = `${API_BASE_URL}/api/admin/data/documents?page=${page}&limit=${limit}`;
+    if (status) url += `&status=${status}`;
+
+    const response = await fetch(url, {
         headers: getAdminHeaders()
     });
 
@@ -202,7 +326,11 @@ export const getDocuments = async () => {
     return response.json();
 };
 
-export const uploadDocument = async (formData) => {
+export const uploadDocument = async (file, autoIndex = true) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('auto_index', autoIndex);
+
     const response = await fetch(`${API_BASE_URL}/api/admin/data/documents/upload`, {
         method: 'POST',
         headers: {
@@ -211,7 +339,11 @@ export const uploadDocument = async (formData) => {
         body: formData
     });
 
-    if (!response.ok) throw new Error('문서 업로드 실패');
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || '문서 업로드 실패');
+    }
+
     return response.json();
 };
 

@@ -3,9 +3,7 @@
 Personalization Enhancer - personalization_core에서 가져옴
 
 이 파일은 personalization_core.personalization_enhancer를 래핑합니다.
-개인화 기능 개선 시 llm_chatbot에서 수정 후:
-    cd /home/aiedu/workspace/personalization_core
-    ./sync_from_llm_chatbot.sh
+개인화 기능 개선 시 personalization_core에서 직접 수정합니다.
 """
 
 # 기본값

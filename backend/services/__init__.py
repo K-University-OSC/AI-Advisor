@@ -4,9 +4,6 @@ Services Module
 
 개인화 관련 서비스는 personalization_core 패키지에서 가져옵니다.
 로컬 확장만 이 디렉토리에 유지됩니다.
-
-참고: 일부 서비스는 llm_chatbot 전용 config에 의존하므로
-      advisor에서는 사용할 수 없을 수 있습니다.
 """
 
 import logging

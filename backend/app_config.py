@@ -186,13 +186,10 @@ class RAGConfig:
 @dataclass
 class DatabaseConfig:
     """데이터베이스 설정"""
-    url: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5434/llm_chatbot")
+    url: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://advisor:***REMOVED***@localhost:10312/advisor_osc_db")
     pool_size: int = int(os.getenv("DB_POOL_SIZE", "50"))
     max_overflow: int = int(os.getenv("DB_MAX_OVERFLOW", "100"))
     pool_timeout: int = int(os.getenv("DB_POOL_TIMEOUT", "30"))
-
-    # 테넌트 설정
-    default_tenant: str = os.getenv("DEFAULT_TENANT", "hallym")
 
 
 # =============================================================================
