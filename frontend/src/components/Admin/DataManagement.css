@@ -1,0 +1,670 @@
+/**
+ * 데이터 관리 대시보드 스타일 (OSC 버전)
+ */
+
+.data-management {
+    min-height: 100vh;
+    background: #f5f7fa;
+    padding: 0;
+}
+
+.data-management.embedded {
+    min-height: auto;
+    background: transparent;
+}
+
+.data-management.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 헤더 */
+.dm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.dm-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dm-header-left h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.dm-header-left svg {
+    color: #3b82f6;
+}
+
+.dm-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-name {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* 에러 배너 */
+.error-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #fef2f2;
+    border-bottom: 1px solid #fecaca;
+    color: #dc2626;
+    font-size: 14px;
+}
+
+.error-banner button {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #dc2626;
+}
+
+/* 통계 그리드 */
+.data-management .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    padding: 24px;
+}
+
+.data-management .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    position: relative;
+}
+
+.data-management .stat-card svg {
+    color: #3b82f6;
+    flex-shrink: 0;
+}
+
+.data-management .stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.data-management .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.data-management .stat-label {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.data-management .stat-sub {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* 탭 네비게이션 */
+.data-management .tab-nav {
+    display: flex;
+    gap: 8px;
+    padding: 0 24px;
+    border-bottom: 1px solid #e5e7eb;
+    background: white;
+}
+
+.data-management .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+}
+
+.data-management .tab-btn:hover {
+    color: #3b82f6;
+}
+
+.data-management .tab-btn.active {
+    color: #3b82f6;
+    border-bottom-color: #3b82f6;
+}
+
+/* 콘텐츠 영역 */
+.data-management .tab-content {
+    padding: 24px;
+}
+
+.data-management .content-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.data-management .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.data-management .section-header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.data-management .section-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* 빈 상태 */
+.data-management .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #9ca3af;
+}
+
+.data-management .empty-state svg {
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.data-management .empty-state p {
+    margin: 0 0 16px;
+    font-size: 14px;
+}
+
+/* 데이터 테이블 */
+.data-management .data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-management .data-table th,
+.data-management .data-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.data-management .data-table th {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    background: #f9fafb;
+}
+
+.data-management .data-table td {
+    font-size: 14px;
+    color: #1f2937;
+}
+
+.data-management .data-table .file-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.data-management .data-table .file-name svg {
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.data-management .data-table .actions {
+    display: flex;
+    gap: 4px;
+}
+
+/* 상태 배지 */
+.data-management .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.data-management .status-badge.green {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.data-management .status-badge.yellow {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.data-management .status-badge.blue {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+.data-management .status-badge.red {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.data-management .status-badge.gray {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.data-management .status-badge svg {
+    flex-shrink: 0;
+}
+
+.data-management .status-badge svg.spinning {
+    animation: spin 1s linear infinite;
+}
+
+/* 사이트 카드 */
+.data-management .site-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+    padding: 20px;
+}
+
+.data-management .site-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.data-management .site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.data-management .site-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.data-management .site-url {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #3b82f6;
+    font-size: 13px;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.data-management .site-url:hover {
+    text-decoration: underline;
+}
+
+.data-management .site-desc {
+    margin: 8px 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.data-management .site-meta {
+    display: flex;
+    gap: 16px;
+    margin: 12px 0;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.data-management .site-last-crawl {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 12px;
+}
+
+.data-management .site-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* 버튼 */
+.data-management .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.data-management .btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.data-management .btn-primary:hover {
+    background: #2563eb;
+}
+
+.data-management .btn-primary:disabled {
+    background: #93c5fd;
+    cursor: not-allowed;
+}
+
+.data-management .btn-secondary {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.data-management .btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.data-management .btn-danger {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.data-management .btn-danger:hover {
+    background: #fecaca;
+}
+
+.data-management .btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.data-management .btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.data-management .btn-icon:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.data-management .btn-icon.danger:hover {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* 모달 */
+.data-management .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.data-management .modal {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.data-management .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.data-management .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.data-management .modal-header button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+}
+
+.data-management .modal form {
+    padding: 20px;
+}
+
+.data-management .form-group {
+    margin-bottom: 16px;
+}
+
+.data-management .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.data-management .form-group input,
+.data-management .form-group textarea,
+.data-management .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1f2937;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.data-management .form-group input:focus,
+.data-management .form-group textarea:focus,
+.data-management .form-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.data-management .form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.data-management .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.data-management .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+/* 확인 모달 */
+.data-management .confirm-modal {
+    max-width: 400px;
+}
+
+.data-management .confirm-modal p {
+    padding: 20px;
+    margin: 0;
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+.data-management .warning-text {
+    color: #dc2626;
+    font-size: 13px;
+}
+
+/* 드래그앤드롭 영역 */
+.data-management .drop-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    margin: 16px 20px;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    background: #f9fafb;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.data-management .drop-zone:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.data-management .drop-zone.active {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    border-style: solid;
+}
+
+.data-management .drop-zone.uploading {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.data-management .drop-zone svg {
+    color: #9ca3af;
+    margin-bottom: 12px;
+}
+
+.data-management .drop-zone.active svg {
+    color: #3b82f6;
+}
+
+.data-management .drop-zone p {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.data-management .drop-zone.active p {
+    color: #3b82f6;
+}
+
+.data-management .drop-zone-hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .data-management .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 16px;
+    }
+
+    .data-management .tab-nav {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data-management .tab-btn {
+        white-space: nowrap;
+    }
+
+    .data-management .section-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .data-management .section-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .data-management .data-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .data-management .form-row {
+        grid-template-columns: 1fr;
+    }
+}

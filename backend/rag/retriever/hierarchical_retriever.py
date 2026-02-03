@@ -10,7 +10,7 @@ import os
 
 from rag.vectorstore import QdrantVectorStore, SearchResult, HybridSearchConfig
 from rag.embeddings import MultimodalEmbeddingService
-from rag.retriever.reranker import BGEReranker
+from rag.retriever.reranker import CohereReranker
 from rag.retriever.query_enhancer import MultiQueryGenerator
 
 
@@ -21,7 +21,7 @@ class RetrievalConfig:
     use_hybrid: bool = False  # BM25 비활성화 (한국어 RAG에서 성능 저하 방지)
     expand_to_parent: bool = True
     include_siblings: bool = False
-    rerank: bool = True  # BGE Reranker 활성화 (+24.6%p 성능 향상)
+    rerank: bool = True  # Cohere Reranker 활성화 (고성능 API 기반)
     rerank_top_k: int = 30  # V7.6.1: 25 → 30 (테이블 청크가 더 많이 포함되도록 후보군 확대)
     use_multi_query: bool = False  # V7.6.1: Multi-Query 비활성화 (단순화)
     num_queries: int = 4  # Multi-Query 사용 시 쿼리 수
@@ -65,13 +65,26 @@ class HierarchicalRetriever:
         self.embedding_service = embedding_service
         self.config = config or RetrievalConfig()
 
-        # BGE Reranker 초기화
-        self.reranker = BGEReranker()
+        # Cohere Reranker 초기화
+        self.reranker = CohereReranker()
         self._reranker_initialized = False
 
-        # Multi-Query Generator 초기화
-        api_key = os.getenv("OPENAI_API_KEY", "")
-        self.multi_query_generator = MultiQueryGenerator(api_key=api_key, model="gpt-4o-mini") if api_key else None
+        # Multi-Query Generator 초기화 (Gemini Flash 사용)
+        google_api_key = os.getenv("GOOGLE_API_KEY", "")
+        if google_api_key:
+            self.multi_query_generator = MultiQueryGenerator(
+                api_key=google_api_key,
+                model="gemini-2.0-flash",
+                provider="google"
+            )
+        else:
+            # Fallback to OpenAI
+            openai_key = os.getenv("OPENAI_API_KEY", "")
+            self.multi_query_generator = MultiQueryGenerator(
+                api_key=openai_key,
+                model="gpt-5-mini",
+                provider="openai"
+            ) if openai_key else None
 
     def _ensure_reranker(self) -> bool:
         """Reranker 초기화 확인"""
@@ -138,7 +151,7 @@ class HierarchicalRetriever:
                     all_results.append(result)
                     seen_chunk_ids.add(result.chunk_id)
 
-        # BGE Reranker로 병합된 결과를 리랭킹 (원본 쿼리 기준)
+        # Cohere Reranker로 병합된 결과를 리랭킹 (원본 쿼리 기준)
         if config.rerank and all_results and self._ensure_reranker():
             child_results = self._rerank_results(query, all_results, config.top_k)
         else:
@@ -164,7 +177,7 @@ class HierarchicalRetriever:
     def _rerank_results(
         self, query: str, results: list[SearchResult], top_k: int
     ) -> list[SearchResult]:
-        """BGE Reranker로 검색 결과 리랭킹"""
+        """Cohere Reranker로 검색 결과 리랭킹"""
         if not results:
             return results
 
@@ -257,18 +270,17 @@ class HierarchicalRetriever:
         context_parts = []
         used_parents = set()
 
+        # 컨텍스트에 출처 헤더 포함하지 않음 (프론트엔드에서 별도 표시)
         if config.expand_to_parent:
             for result in child_results:
                 if result.parent_id and result.parent_id not in used_parents:
                     parent_content = parent_contents.get(result.parent_id)
                     if parent_content:
-                        section_header = f"[출처: {result.source}, 섹션: {result.heading or '알 수 없음'}]"
-                        context_parts.append(f"{section_header}\n{parent_content}")
+                        context_parts.append(parent_content)
                         used_parents.add(result.parent_id)
         else:
             for result in child_results:
-                section_header = f"[출처: {result.source}, 페이지: {result.page}]"
-                context_parts.append(f"{section_header}\n{result.content}")
+                context_parts.append(result.content)
 
         return "\n\n---\n\n".join(context_parts)
 

@@ -506,9 +506,43 @@ body {
     margin-top: 4px;
 }
 
+/* 사용자 메시지: 어시스턴트와 같은 800px 영역 내에서 오른쪽 정렬 */
+.message.user {
+    justify-content: center;
+    padding-right: 24px;
+    padding-left: 24px;
+}
+
+.message.user .message-content-wrapper {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    max-width: 800px;
+    width: 100%;
+}
+
 .message.user .avatar {
+    background: #E8F0FE;
+    color: #1A73E8;
+}
+
+.message.user .message-body {
+    flex-grow: 0;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.message.user .user-text {
     background: #1A73E8;
     color: #FFFFFF;
+    padding: 12px 18px;
+    border-radius: 20px 20px 4px 20px;
+    display: inline-block;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.message.user .message-attachments {
+    justify-content: flex-end;
 }
 
 .message.assistant .avatar {
@@ -1220,4 +1254,80 @@ body {
 .tool-badge svg {
     width: 12px;
     height: 12px;
+}
+
+/* ==================== 출처 표시 (Sources) ==================== */
+.message-sources {
+    margin-top: 12px;
+    padding: 12px;
+    background-color: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--bg-tertiary);
+}
+
+.sources-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.sources-header svg {
+    color: var(--accent-blue);
+}
+
+.sources-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.source-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--bg-tertiary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: 13px;
+    text-align: left;
+}
+
+.source-item:hover {
+    background-color: #E8F0FE;
+    border-color: var(--accent-blue);
+}
+
+.source-item .source-name {
+    flex: 1;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+}
+
+.source-item .source-page {
+    flex-shrink: 0;
+    padding: 2px 6px;
+    background-color: var(--accent-blue);
+    color: white;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.source-item svg {
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.source-item:hover svg {
+    color: var(--accent-blue);
 }

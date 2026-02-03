@@ -397,55 +397,72 @@ async def index_document_task(doc_id: str, file_path: str):
             await session.commit()
 
         # 현재 프로젝트의 rag 모듈 로드
-        from rag.parsers.azure_document_parser import AzureDocumentParser
-        from rag.embeddings.embedding_service import OpenAIEmbeddingService, SparseEmbeddingService, MultimodalEmbeddingService
+        from rag.parsers.parser_factory import get_document_parser
+        from rag.embeddings.embedding_service import OpenAIEmbeddingService, GeminiEmbeddingService, SparseEmbeddingService, MultimodalEmbeddingService
         from rag.vectorstore.qdrant_store import QdrantVectorStore
         from rag.chunkers.hierarchical_chunker import HierarchicalChunker
 
-        # 환경변수에서 API 키 로드
-        OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-        COLLECTION_NAME = f"mh_rag_default"  # 테넌트별 컬렉션
+        # 환경변수에서 설정 로드 (v1.6: Gemini 솔루션 사용)
+        COLLECTION_NAME = os.getenv("QDRANT_COLLECTION_NAME", "advisor_osc_finance_gemini_embed")
         QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")  # Docker 컨테이너 이름
         QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
+        EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "google").lower()
+        EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "gemini-embedding-001")
 
-        # 서비스 초기화
-        parser = AzureDocumentParser()
+        # 서비스 초기화 (환경변수 DOCUMENT_PARSER로 선택, 기본값: gemini)
+        parser = get_document_parser()
         chunker = HierarchicalChunker(
             parent_chunk_size=2000,
             child_chunk_size=500,
             chunk_overlap=50,
         )
 
-        dense_embedding = OpenAIEmbeddingService(
-            api_key=OPENAI_API_KEY,
-            model="text-embedding-3-large"
-        )
+        # 임베딩 서비스 선택 (EMBEDDING_PROVIDER 환경변수에 따라)
+        if EMBEDDING_PROVIDER == "google":
+            GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
+            dense_embedding = GeminiEmbeddingService(
+                api_key=GOOGLE_API_KEY,
+                model=EMBEDDING_MODEL
+            )
+            logger.info(f"[index] Gemini 임베딩 사용: {EMBEDDING_MODEL}")
+        else:
+            OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+            dense_embedding = OpenAIEmbeddingService(
+                api_key=OPENAI_API_KEY,
+                model=EMBEDDING_MODEL if EMBEDDING_MODEL else "text-embedding-3-large"
+            )
+            logger.info(f"[index] OpenAI 임베딩 사용: {EMBEDDING_MODEL}")
+
         sparse_embedding = SparseEmbeddingService()
         embedding_service = MultimodalEmbeddingService(
             dense_service=dense_embedding,
             sparse_service=sparse_embedding
         )
 
-        # 테넌트별 컬렉션 자동 생성
+        # 컬렉션 확인 및 자동 생성
         from qdrant_client import QdrantClient
         from qdrant_client.models import VectorParams, Distance, SparseVectorParams, SparseIndexParams
 
         qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
         collections = [c.name for c in qdrant_client.get_collections().collections]
 
+        # 임베딩 모델에 따른 dimensions 설정
+        # gemini-embedding-001: 3072, text-embedding-3-large: 3072
+        VECTOR_SIZE = 3072  # Both Gemini and OpenAI use 3072 dimensions
+
         if COLLECTION_NAME not in collections:
-            logger.info(f"[default] 새 컬렉션 생성: {COLLECTION_NAME}")
+            logger.info(f"[index] 새 컬렉션 생성: {COLLECTION_NAME} (dim={VECTOR_SIZE})")
             qdrant_client.create_collection(
                 collection_name=COLLECTION_NAME,
                 vectors_config={
-                    "dense": VectorParams(size=3072, distance=Distance.COSINE)
+                    "dense": VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE)
                 },
                 sparse_vectors_config={
                     "sparse": SparseVectorParams(index=SparseIndexParams(on_disk=False))
                 },
                 on_disk_payload=True,
             )
-            logger.info(f"[default] 컬렉션 생성 완료: {COLLECTION_NAME}")
+            logger.info(f"[index] 컬렉션 생성 완료: {COLLECTION_NAME}")
 
         vector_store = QdrantVectorStore(
             collection_name=COLLECTION_NAME,
@@ -458,8 +475,9 @@ async def index_document_task(doc_id: str, file_path: str):
 
         # PDF만 Azure 파서 사용, 나머지는 간단한 텍스트 처리
         if file_ext == '.pdf':
-            # Azure Document Intelligence로 PDF 파싱
-            logger.info(f"[default] Azure 파서로 PDF 파싱 중...")
+            # 문서 파서로 PDF 파싱 (기본: PyMuPDF, 환경변수로 변경 가능)
+            parser_type = os.getenv("DOCUMENT_PARSER", "pymupdf")
+            logger.info(f"[default] {parser_type} 파서로 PDF 파싱 중...")
             parsed_doc = await parser.parse(file_path)
             logger.info(f"[default] 파싱 완료: {len(parsed_doc.elements)}개 요소")
 

@@ -6,10 +6,12 @@ Query Enhancement 모듈
 - Query Expansion: 동의어/관련 키워드 추가
 - Multi-Query: 여러 관점의 쿼리 생성
 - Query Classification: 쿼리 유형 분류 (text/table/image)
+- V8: Gemini Flash 지원 추가
 """
 
 import json
 import re
+import os
 from dataclasses import dataclass
 from typing import Optional
 import httpx
@@ -26,16 +28,27 @@ class EnhancedQuery:
 
 
 class QueryEnhancer:
-    """쿼리 확장 및 분류기"""
+    """쿼리 확장 및 분류기 (OpenAI / Gemini 지원)"""
 
-    def __init__(self, api_key: str, model: str = "gpt-5.2"):
-        self.api_key = api_key
+    def __init__(
+        self,
+        api_key: str = None,
+        model: str = "gemini-3-flash-preview",
+        provider: str = "google"
+    ):
+        self.provider = provider.lower()
         self.model = model
-        self.api_url = "https://api.openai.com/v1/chat/completions"
+
+        if self.provider == "google":
+            self.api_key = api_key or os.getenv("GOOGLE_API_KEY", "")
+            self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        else:
+            self.api_key = api_key or os.getenv("OPENAI_API_KEY", "")
+            self.api_url = "https://api.openai.com/v1/chat/completions"
 
     async def enhance(self, query: str) -> EnhancedQuery:
         """
-        쿼리 확장 및 분류
+        쿼리 확장 및 분류 (OpenAI / Gemini 지원)
 
         Args:
             query: 원본 쿼리
@@ -55,44 +68,19 @@ class QueryEnhancer:
    - mixed: 여러 유형이 복합된 질문
 3. **BM25 추천**: 특정 용어/숫자가 중요하면 true, 의미 검색이 중요하면 false
 
-JSON 형식으로 출력:
-{
-  "keywords": ["키워드1", "키워드2", "키워드3"],
-  "query_type": "text|table|image|mixed",
-  "use_bm25": true|false,
-  "reasoning": "분류 이유 (1문장)"
-}"""
+JSON 형식으로만 출력 (다른 텍스트 없이):
+{"keywords": ["키워드1", "키워드2", "키워드3"], "query_type": "text", "use_bm25": false}"""
 
         user_prompt = f"질문: {query}"
 
         try:
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            }
+            if self.provider == "google":
+                result = await self._call_gemini(system_prompt, user_prompt)
+            else:
+                result = await self._call_openai(system_prompt, user_prompt)
 
-            payload = {
-                "model": self.model,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                "temperature": 0,
-                "max_completion_tokens": 200,
-                "response_format": {"type": "json_object"}
-            }
-
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    self.api_url,
-                    headers=headers,
-                    json=payload,
-                )
-
-            if response.status_code != 200:
+            if result is None:
                 return self._fallback_enhance(query)
-
-            result = json.loads(response.json()["choices"][0]["message"]["content"])
 
             keywords = result.get("keywords", [])
             query_type = result.get("query_type", "text")
@@ -112,6 +100,77 @@ JSON 형식으로 출력:
         except Exception as e:
             print(f"쿼리 확장 실패: {e}")
             return self._fallback_enhance(query)
+
+    async def _call_gemini(self, system_prompt: str, user_prompt: str) -> Optional[dict]:
+        """Gemini API 호출"""
+        try:
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "contents": [{
+                    "parts": [{"text": f"{system_prompt}\n\n{user_prompt}"}]
+                }],
+                "generationConfig": {
+                    "temperature": 0,
+                    "maxOutputTokens": 200,
+                }
+            }
+
+            url = f"{self.api_url}?key={self.api_key}"
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(url, headers=headers, json=payload)
+
+            if response.status_code != 200:
+                print(f"Gemini API 오류: {response.status_code}")
+                return None
+
+            result = response.json()
+            text = result["candidates"][0]["content"]["parts"][0]["text"]
+
+            # JSON 파싱 (```json 블록 제거)
+            text = text.strip()
+            if text.startswith("```"):
+                text = text.split("```")[1]
+                if text.startswith("json"):
+                    text = text[4:]
+            text = text.strip()
+
+            return json.loads(text)
+
+        except Exception as e:
+            print(f"Gemini 호출 실패: {e}")
+            return None
+
+    async def _call_openai(self, system_prompt: str, user_prompt: str) -> Optional[dict]:
+        """OpenAI API 호출"""
+        try:
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            }
+            payload = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                "temperature": 0,
+                "max_completion_tokens": 200,
+                "response_format": {"type": "json_object"}
+            }
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(self.api_url, headers=headers, json=payload)
+
+            if response.status_code != 200:
+                print(f"OpenAI API 오류: {response.status_code}")
+                return None
+
+            return json.loads(response.json()["choices"][0]["message"]["content"])
+
+        except Exception as e:
+            print(f"OpenAI 호출 실패: {e}")
+            return None
 
     def _build_expanded_query(self, query: str, keywords: list[str]) -> str:
         """확장된 쿼리 생성"""
@@ -151,12 +210,23 @@ JSON 형식으로 출력:
 
 
 class MultiQueryGenerator:
-    """다중 쿼리 생성기"""
+    """다중 쿼리 생성기 (OpenAI / Gemini 지원)"""
 
-    def __init__(self, api_key: str, model: str = "gpt-5.2"):
-        self.api_key = api_key
+    def __init__(
+        self,
+        api_key: str = None,
+        model: str = "gemini-3-flash-preview",
+        provider: str = "google"
+    ):
+        self.provider = provider.lower()
         self.model = model
-        self.api_url = "https://api.openai.com/v1/chat/completions"
+
+        if self.provider == "google":
+            self.api_key = api_key or os.getenv("GOOGLE_API_KEY", "")
+            self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        else:
+            self.api_key = api_key or os.getenv("OPENAI_API_KEY", "")
+            self.api_url = "https://api.openai.com/v1/chat/completions"
 
     async def generate(self, query: str, num_queries: int = 4) -> list[str]:
         """
@@ -175,25 +245,78 @@ class MultiQueryGenerator:
 
 ## 생성 규칙
 1. **복합 질문 분해**: 질문에 여러 부분이 있으면 각각 별도 쿼리로 분해
-   - 예: "A의 명칭과 B의 배경" → "A 명칭", "B 배경"
-2. **배경/원인 질문**: "배경", "이유", "원인"이 있으면 관련 통계, 사회적 상황도 검색
-   - 예: "X 출시 배경" → "X 출시 배경", "X 관련 통계 현황"
+2. **배경/원인 질문**: "배경", "이유", "원인"이 있으면 관련 통계도 검색
 3. **영향/결과 질문**: "영향", "결과", "전망"이 있으면 인과관계 검색
-   - 예: "Y의 영향" → "Y 영향", "Y로 인한 결과", "Y 전망"
 4. **키워드 변형**: 동의어나 관련 표현으로 변형
 
-## 출력 형식
-JSON으로 출력:
+JSON으로만 출력 (다른 텍스트 없이):
 {{"queries": ["쿼리1", "쿼리2", "쿼리3"]}}"""
 
         user_prompt = f"원본 질문: {query}"
 
         try:
+            if self.provider == "google":
+                result = await self._call_gemini(system_prompt, user_prompt)
+            else:
+                result = await self._call_openai(system_prompt, user_prompt)
+
+            if result is None:
+                return [query]
+
+            queries = result.get("queries", [])
+            all_queries = [query] + queries[:num_queries-1]
+            return all_queries
+
+        except Exception as e:
+            print(f"다중 쿼리 생성 실패: {e}")
+            return [query]
+
+    async def _call_gemini(self, system_prompt: str, user_prompt: str) -> Optional[dict]:
+        """Gemini API 호출"""
+        try:
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "contents": [{
+                    "parts": [{"text": f"{system_prompt}\n\n{user_prompt}"}]
+                }],
+                "generationConfig": {
+                    "temperature": 0.3,
+                    "maxOutputTokens": 200,
+                }
+            }
+
+            url = f"{self.api_url}?key={self.api_key}"
+
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(url, headers=headers, json=payload)
+
+            if response.status_code != 200:
+                return None
+
+            result = response.json()
+            text = result["candidates"][0]["content"]["parts"][0]["text"]
+
+            # JSON 파싱
+            text = text.strip()
+            if text.startswith("```"):
+                text = text.split("```")[1]
+                if text.startswith("json"):
+                    text = text[4:]
+            text = text.strip()
+
+            return json.loads(text)
+
+        except Exception as e:
+            print(f"Gemini 호출 실패: {e}")
+            return None
+
+    async def _call_openai(self, system_prompt: str, user_prompt: str) -> Optional[dict]:
+        """OpenAI API 호출"""
+        try:
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
                 "Content-Type": "application/json",
             }
-
             payload = {
                 "model": self.model,
                 "messages": [
@@ -206,22 +329,13 @@ JSON으로 출력:
             }
 
             async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    self.api_url,
-                    headers=headers,
-                    json=payload,
-                )
+                response = await client.post(self.api_url, headers=headers, json=payload)
 
             if response.status_code != 200:
-                return [query]
+                return None
 
-            result = json.loads(response.json()["choices"][0]["message"]["content"])
-            queries = result.get("queries", [])
-
-            # 원본 쿼리를 첫 번째로
-            all_queries = [query] + queries[:num_queries-1]
-            return all_queries
+            return json.loads(response.json()["choices"][0]["message"]["content"])
 
         except Exception as e:
-            print(f"다중 쿼리 생성 실패: {e}")
-            return [query]
+            print(f"OpenAI 호출 실패: {e}")
+            return None

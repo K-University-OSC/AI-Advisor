@@ -46,7 +46,7 @@ function LoginForm({ onLoginSuccess }) {
     return (
         <div className="auth-container">
             <div className="auth-box">
-                <h1 className="auth-title">Multi-LLM Chatbot</h1>
+                <h1 className="auth-title">Advisor OSC</h1>
                 <p className="auth-subtitle">
                     {isLogin ? '로그인하여 대화를 시작하세요' : '새 계정을 만드세요'}
                 </p>

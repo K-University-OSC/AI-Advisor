@@ -7,7 +7,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from datetime import datetime, timedelta
 from typing import Optional
-import hashlib
+import bcrypt
 import jwt
 import os
 import logging
@@ -53,15 +53,23 @@ class UserResponse(BaseModel):
     created_at: str
 
 
-# 비밀번호 해싱
+# 비밀번호 해싱 (bcrypt - 보안 강화)
 def hash_password(password: str) -> str:
-    """비밀번호를 SHA256으로 해싱"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """비밀번호를 bcrypt로 해싱 (보안 강화)"""
+    salt = bcrypt.gensalt(rounds=12)
+    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    """비밀번호 검증"""
-    return hash_password(password) == password_hash
+    """비밀번호 검증 (bcrypt)"""
+    try:
+        return bcrypt.checkpw(password.encode('utf-8'), password_hash.encode('utf-8'))
+    except Exception:
+        # SHA256 해시 호환성 (기존 사용자 마이그레이션용)
+        import hashlib
+        if len(password_hash) == 64:  # SHA256 해시 길이
+            return hashlib.sha256(password.encode()).hexdigest() == password_hash
+        return False
 
 
 # JWT 토큰 생성/검증

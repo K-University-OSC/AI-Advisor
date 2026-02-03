@@ -469,7 +469,45 @@ def get_llm(user_settings: dict):
     Returns:
         LLM 인스턴스
     """
-    model_provider = user_settings.get("model_provider", "openai")
+    model_provider = user_settings.get("model_provider", "default")
+
+    # 환경변수 기반 기본 모델 사용 (Advisor OSC v1.6)
+    if model_provider == "default" or model_provider is None:
+        llm_provider = os.getenv("LLM_PROVIDER", "google").lower()
+        llm_model = os.getenv("LLM_MODEL", "gemini-3-flash-preview")
+
+        if llm_provider == "google":
+            return ChatGoogleGenerativeAI(
+                model=llm_model,
+                google_api_key=GOOGLE_API_KEY,
+                temperature=user_settings.get("temperature", 0.7),
+                max_output_tokens=5000,
+                disable_streaming=False
+            )
+        elif llm_provider == "openai":
+            return ChatOpenAI(
+                model=llm_model,
+                max_completion_tokens=2000,
+                streaming=True,
+                openai_api_key=OPENAI_API_KEY
+            )
+        elif llm_provider == "anthropic":
+            return ChatAnthropic(
+                model=llm_model,
+                api_key=CLAUDE_API_KEY,
+                temperature=user_settings.get("temperature", 0.7),
+                max_tokens=2000,
+                streaming=True
+            )
+        else:
+            # 알 수 없는 provider는 Google Gemini 사용
+            return ChatGoogleGenerativeAI(
+                model=llm_model,
+                google_api_key=GOOGLE_API_KEY,
+                temperature=user_settings.get("temperature", 0.7),
+                max_output_tokens=5000,
+                disable_streaming=False
+            )
     
     if model_provider == "pplxp": # perplexity sonar-pro (출처 포함)
         return PerplexityChatModel(

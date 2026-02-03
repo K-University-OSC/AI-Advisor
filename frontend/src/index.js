@@ -5,21 +5,21 @@ import App from './App';
 import { AdminApp } from './components/Admin';
 
 /**
- * 라우터 컴포넌트 - URL 해시 기반 라우팅 (OSC 공개 버전)
- * #/admin -> 관리자 대시보드
+ * 라우터 컴포넌트 - URL 경로 기반 라우팅 (OSC 공개 버전)
+ * /admin-login -> 관리자 대시보드
  * 그 외 -> 일반 사용자 앱
  */
 function Router() {
-    const [route, setRoute] = useState(window.location.hash);
+    const [route, setRoute] = useState(window.location.pathname);
 
     useEffect(() => {
-        const handleHashChange = () => setRoute(window.location.hash);
-        window.addEventListener('hashchange', handleHashChange);
-        return () => window.removeEventListener('hashchange', handleHashChange);
+        const handlePopState = () => setRoute(window.location.pathname);
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
     }, []);
 
     // 관리자 페이지
-    if (route === '#/admin') {
+    if (route === '/admin-login') {
         return <AdminApp />;
     }
 

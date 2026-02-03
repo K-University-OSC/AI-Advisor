@@ -1,5 +1,5 @@
 /**
- * Multi-LLM Chatbot - Gemini 스타일 다크 테마 UI (OSC 공개 버전)
+ * Advisor OSC - Gemini 스타일 다크 테마 UI (OSC 공개 버전)
  */
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -14,11 +14,11 @@ import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {
     Send, Plus, MessageSquare, Menu, Settings, HelpCircle, History,
     User, Copy, ThumbsUp, ThumbsDown, RotateCcw, MoreVertical,
-    Paperclip, X, LogOut, Check, ChevronDown, Trash2, Edit3, Square,
-    Search, Brain, BookOpen, Globe, PenTool
+    Paperclip, X, LogOut, Check, Trash2, Edit3, Square,
+    Search, Brain, BookOpen, Globe, PenTool, FileText, ExternalLink
 } from 'lucide-react';
 
-import { API_BASE_URL, LLM_MODELS, DEFAULT_MODEL } from './Config';
+import { API_BASE_URL } from './Config';
 import { getToken, getUser, logout, getAuthHeader } from './api/authApi';
 import LoginForm from './components/Auth/LoginForm';
 import './styles/App.css';
@@ -33,14 +33,12 @@ function App() {
     // 채팅 상태
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
-    const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
     const [isLoading, setIsLoading] = useState(false);
     const [sessionId, setSessionId] = useState(null);
     const [sessions, setSessions] = useState([]);
 
     // UI 상태
     const [isSidebarOpen, setSidebarOpen] = useState(true);
-    const [showModelDropdown, setShowModelDropdown] = useState(false);
 
     // 파일 업로드 상태
     const [attachments, setAttachments] = useState([]);
@@ -68,7 +66,6 @@ function App() {
     const textareaRef = useRef(null);
     const fileInputRef = useRef(null);
     const abortControllerRef = useRef(null);
-    const modelDropdownRef = useRef(null);
     const activeSessionIdRef = useRef(null);  // 현재 보고 있는 세션 ID
     // 백그라운드 스트리밍 버퍼: { [sessionId]: { content, isStreaming, messages, abortController } }
     const streamingBuffersRef = useRef({});
@@ -77,17 +74,6 @@ function App() {
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, isLoading]);
-
-    // 모델 드롭다운 외부 클릭 감지
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target)) {
-                setShowModelDropdown(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     // 인증 체크
     useEffect(() => {
@@ -366,7 +352,6 @@ function App() {
         const assistantMessage = {
             role: 'assistant',
             content: '',
-            model: selectedModel,
             isStreaming: true
         };
 
@@ -401,7 +386,6 @@ function App() {
                 },
                 body: JSON.stringify({
                     message: userMessage.content,
-                    model: selectedModel,
                     session_id: sessionId,
                     attachment_ids: currentAttachments.map(a => a.serverId).filter(id => id != null),
                     agent_mode: true
@@ -522,7 +506,8 @@ function App() {
                                     ...currentMessages[currentMessages.length - 1],
                                     isStreaming: false,
                                     messageId: data.message_id,
-                                    toolUsed: data.tool_used
+                                    toolUsed: data.tool_used,
+                                    sources: data.sources || []  // 출처 정보 저장
                                 };
 
                                 // 버퍼에서 스트리밍 완료 표시 후 삭제
@@ -588,6 +573,24 @@ function App() {
         setMessages(prev => prev.map(msg =>
             msg.isStreaming ? { ...msg, isStreaming: false } : msg
         ));
+    };
+
+    // PDF 소스 클릭 핸들러 - 해당 페이지를 하이라이트와 함께 새 탭에서 열기
+    const handleSourceClick = (source) => {
+        // source: { source: "파일명.pdf", page: 1, score: 0.8, keywords: "키워드1|키워드2" }
+        const filename = encodeURIComponent(source.source);
+        const page = source.page || 1;
+        const keywords = source.keywords || '';
+
+        // 업로드된 파일인지 확인 (패턴: 20260202_042856_xxxxx.pdf)
+        const isUploadedFile = /^\d{8}_\d{6}_[a-f0-9]+\.pdf$/i.test(source.source);
+        const domain = isUploadedFile ? 'uploads' : 'finance';
+
+        // PDF 뷰어 URL 생성
+        const pdfUrl = `${API_BASE_URL}/api/chat/pdf-pages/${domain}/${filename}?page=${page}&range_pages=3&highlight=${encodeURIComponent(keywords)}`;
+
+        // 새 탭에서 열기
+        window.open(pdfUrl, '_blank');
     };
 
     // 메시지 피드백 핸들러
@@ -948,7 +951,7 @@ function App() {
                                 <Menu size={24} />
                             </button>
                         )}
-                        <span className="app-title">Multi-LLM Chatbot</span>
+                        <span className="app-title">Advisor OSC</span>
                     </div>
 
                     <div className="top-bar-right">
@@ -984,11 +987,6 @@ function App() {
                                         </div>
 
                                         <div className="message-body">
-                                            {/* 모델명 표시 (AI 응답) */}
-                                            {msg.role === 'assistant' && msg.model && LLM_MODELS[msg.model] && (
-                                                <span className="model-badge">{LLM_MODELS[msg.model].name}</span>
-                                            )}
-
                                             {/* 첨부파일 */}
                                             {msg.attachments && msg.attachments.length > 0 && (
                                                 <div className="message-attachments">
@@ -1064,6 +1062,30 @@ function App() {
                                                 </div>
                                             )}
 
+                                            {/* 출처 표시 */}
+                                            {msg.role === 'assistant' && !msg.isStreaming && msg.sources && msg.sources.length > 0 && (
+                                                <div className="message-sources">
+                                                    <div className="sources-header">
+                                                        <FileText size={14} />
+                                                        <span>출처</span>
+                                                    </div>
+                                                    <div className="sources-list">
+                                                        {msg.sources.map((src, srcIdx) => (
+                                                            <button
+                                                                key={srcIdx}
+                                                                className="source-item"
+                                                                onClick={() => handleSourceClick(src)}
+                                                                title={`${src.displayName || src.source} - ${src.page}페이지 (관련도: ${(src.score * 100).toFixed(0)}%)`}
+                                                            >
+                                                                <span className="source-name">{src.displayName || src.source}</span>
+                                                                <span className="source-page">p.{src.page}</span>
+                                                                <ExternalLink size={12} />
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {/* AI 응답 액션 버튼 */}
                                             {msg.role === 'assistant' && !msg.isStreaming && msg.content && (
                                                 <div className="message-actions">
@@ -1130,34 +1152,6 @@ function App() {
                         onDrop={handleDrop}
                     >
                         <div className="input-row">
-                            {/* 모델 선택 */}
-                            <div className="model-selector" ref={modelDropdownRef}>
-                                <button
-                                    className="model-selector-btn"
-                                    onClick={() => setShowModelDropdown(!showModelDropdown)}
-                                >
-                                    {LLM_MODELS[selectedModel]?.name || selectedModel}
-                                    <ChevronDown size={16} />
-                                </button>
-                                {showModelDropdown && (
-                                    <div className="model-dropdown">
-                                        {Object.entries(LLM_MODELS).map(([key, model]) => (
-                                            <div
-                                                key={key}
-                                                className={`model-option ${selectedModel === key ? 'selected' : ''}`}
-                                                onClick={() => {
-                                                    setSelectedModel(key);
-                                                    setShowModelDropdown(false);
-                                                }}
-                                            >
-                                                <span className="model-name">{model.name}</span>
-                                                <span className="model-provider">{model.provider}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
                             {/* 파일 첨부 버튼 */}
                             <input
                                 type="file"

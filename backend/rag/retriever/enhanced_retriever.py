@@ -46,13 +46,13 @@ class EnhancedRetrievalConfig:
     expand_to_parent: bool = True
     rerank: bool = True
 
-    # V7.2/V7.6: Reranker 선택
+    # V8: Reranker 선택
+    # - "cohere": API 기반, 고성능 (기본값)
     # - "bge": 로컬, 무료, Cross-Encoder
-    # - "cohere": API 기반, 고성능
     # - "voyage": API 기반, 최신
-    # - "colbert": Token-level Late Interaction, 한국어 최적화 (V7.6)
+    # - "colbert": Token-level Late Interaction, 한국어 최적화
     # - "jina": Multilingual, Late Interaction
-    reranker_type: str = "bge"
+    reranker_type: str = "cohere"
 
     # 향상 기능 설정
     enable_query_expansion: bool = True      # 쿼리 확장 활성화
@@ -1360,18 +1360,17 @@ class EnhancedHierarchicalRetriever:
         context_parts = []
         used_parents = set()
 
+        # 컨텍스트에 출처 헤더 포함하지 않음 (프론트엔드에서 별도 표시)
         if config.expand_to_parent:
             for result in child_results:
                 if result.parent_id and result.parent_id not in used_parents:
                     parent_content = parent_contents.get(result.parent_id)
                     if parent_content:
-                        section_header = f"[출처: {result.source}, 섹션: {result.heading or '알 수 없음'}]"
-                        context_parts.append(f"{section_header}\n{parent_content}")
+                        context_parts.append(parent_content)
                         used_parents.add(result.parent_id)
         else:
             for result in child_results:
-                section_header = f"[출처: {result.source}, 페이지: {result.page}]"
-                context_parts.append(f"{section_header}\n{result.content}")
+                context_parts.append(result.content)
 
         return "\n\n---\n\n".join(context_parts)
 

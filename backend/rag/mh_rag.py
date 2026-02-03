@@ -17,6 +17,7 @@ from config import get_settings, Settings
 from rag.parsers import (
     UpstageDocumentParser,
     OpenAIImageCaptioner,
+    GeminiImageCaptioner,
     BatchImageCaptioner,
     ParsedDocument,
     CaptionResult,
@@ -29,6 +30,7 @@ from rag.chunkers import (
 )
 from rag.embeddings import (
     OpenAIEmbeddingService,
+    GeminiEmbeddingService,
     SparseEmbeddingService,
     MultimodalEmbeddingService,
 )
@@ -86,10 +88,21 @@ class MultimodalHierarchicalRAG:
             api_key=self.settings.upstage_api_key,
         )
 
-        image_captioner = OpenAIImageCaptioner(
-            api_key=self.settings.openai_api_key,
-            model=self.settings.vlm_model,
-        )
+        # 이미지 캡셔너 선택 (VLM_PROVIDER 환경변수에 따라)
+        vlm_provider = os.getenv("VLM_PROVIDER", "openai").lower()
+        if vlm_provider == "google":
+            google_api_key = os.getenv("GOOGLE_API_KEY", "")
+            image_captioner = GeminiImageCaptioner(
+                api_key=google_api_key,
+                model=self.settings.vlm_model or "gemini-3-flash-preview",
+            )
+            print(f"  - Gemini 이미지 캡셔너 활성화 ({self.settings.vlm_model or 'gemini-3-flash-preview'})")
+        else:
+            image_captioner = OpenAIImageCaptioner(
+                api_key=self.settings.openai_api_key,
+                model=self.settings.vlm_model,
+            )
+            print(f"  - OpenAI 이미지 캡셔너 활성화 ({self.settings.vlm_model})")
         self._captioner = BatchImageCaptioner(captioner=image_captioner)
 
         # 하이브리드 이미지 프로세서 (Azure OCR + VLM)
@@ -110,10 +123,21 @@ class MultimodalHierarchicalRAG:
             chunk_overlap=self.settings.chunk_overlap,
         )
 
-        dense_service = OpenAIEmbeddingService(
-            api_key=self.settings.openai_api_key,
-            model=self.settings.embedding_model,
-        )
+        # 임베딩 서비스 선택 (EMBEDDING_PROVIDER 환경변수에 따라)
+        embedding_provider = os.getenv("EMBEDDING_PROVIDER", "openai").lower()
+        if embedding_provider == "google":
+            google_api_key = os.getenv("GOOGLE_API_KEY", "")
+            dense_service = GeminiEmbeddingService(
+                api_key=google_api_key,
+                model=self.settings.embedding_model,
+            )
+            print(f"  - Gemini 임베딩 서비스 활성화 ({self.settings.embedding_model})")
+        else:
+            dense_service = OpenAIEmbeddingService(
+                api_key=self.settings.openai_api_key,
+                model=self.settings.embedding_model,
+            )
+            print(f"  - OpenAI 임베딩 서비스 활성화 ({self.settings.embedding_model})")
         sparse_service = SparseEmbeddingService()
         self._embedding_service = MultimodalEmbeddingService(
             dense_service=dense_service,
@@ -372,7 +396,7 @@ class MultimodalHierarchicalRAG:
 1. 컨텍스트에 있는 정보만을 사용하여 답변하세요.
 2. 수치나 데이터를 인용할 때는 정확하게 인용하세요.
 3. 차트나 그래프 분석 내용이 포함되어 있다면 그 내용도 활용하세요.
-4. 답변 마지막에 참조한 출처(문서명, 페이지)를 간단히 언급해주세요.
+4. 출처나 참고 문서는 별도로 언급하지 마세요. UI에서 자동으로 표시됩니다.
 
 ## 정보 부족 시 대응
 - 질문에 대한 **직접적인 답변**이 컨텍스트에 없으면:

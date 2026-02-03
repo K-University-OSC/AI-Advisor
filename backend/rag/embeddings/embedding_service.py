@@ -125,6 +125,83 @@ class OpenAIEmbeddingService(EmbeddingService):
         return text
 
 
+class GeminiEmbeddingService(EmbeddingService):
+    """Gemini 임베딩 서비스 (gemini-embedding-001, MTEB 1위)"""
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "gemini-embedding-001",
+        batch_size: int = 100,
+    ):
+        self.api_key = api_key
+        self.model = model
+        self.batch_size = batch_size
+        self.batch_api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:batchEmbedContents"
+
+    async def embed_text(self, text: str) -> list[float]:
+        """단일 텍스트 임베딩"""
+        embeddings = await self.embed_texts([text])
+        return embeddings[0]
+
+    async def embed_texts(self, texts: list[str]) -> list[list[float]]:
+        """다중 텍스트 임베딩 (배치 처리)"""
+        if not texts:
+            return []
+
+        all_embeddings = []
+
+        for i in range(0, len(texts), self.batch_size):
+            batch = texts[i:i + self.batch_size]
+            batch_embeddings = await self._embed_batch(batch)
+            all_embeddings.extend(batch_embeddings)
+
+        return all_embeddings
+
+    async def _embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """배치 임베딩"""
+        cleaned_texts = [self._clean_text(t) for t in texts]
+
+        requests = []
+        for text in cleaned_texts:
+            requests.append({
+                "model": f"models/{self.model}",
+                "content": {
+                    "parts": [{"text": text}]
+                }
+            })
+
+        payload = {"requests": requests}
+
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(
+                f"{self.batch_api_url}?key={self.api_key}",
+                headers={"Content-Type": "application/json"},
+                json=payload,
+            )
+
+        if response.status_code != 200:
+            raise Exception(
+                f"Gemini 임베딩 API 오류: {response.status_code} - {response.text}"
+            )
+
+        result = response.json()
+        embeddings = []
+        for item in result.get("embeddings", []):
+            embeddings.append(item.get("values", []))
+
+        return embeddings
+
+    def _clean_text(self, text: str) -> str:
+        """텍스트 정제"""
+        text = text.replace("\n", " ")
+        text = re.sub(r"\s+", " ", text)
+        text = text.strip()
+        if len(text) > 8000:
+            text = text[:8000]
+        return text
+
+
 class SparseEmbeddingService:
     """Sparse 임베딩 서비스 (BM25 스타일)"""
 

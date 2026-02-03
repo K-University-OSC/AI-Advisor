@@ -291,7 +291,7 @@ AVAILABLE_MODELS = [
 
 class ChatRequest(BaseModel):
     message: str
-    model: str = "gpt4o"
+    model: str = "default"  # 환경변수 LLM_MODEL 사용 (v1.6: gemini-2.0-flash)
     session_id: Optional[str] = None
     temperature: float = 0.7
     attachment_ids: Optional[List[int]] = None  # 첨부파일 ID 목록
@@ -869,7 +869,18 @@ async def send_message(request: ChatRequest, current_user: dict = Depends(get_cu
 
             # 스트리밍 응답
             async for chunk in llm.astream(chat_messages):
-                content = chunk.content if hasattr(chunk, 'content') else str(chunk)
+                raw_content = chunk.content if hasattr(chunk, 'content') else str(chunk)
+
+                # Gemini 3 Flash의 리스트 형식 응답 처리
+                # [{'type': 'text', 'text': '내용', ...}] 형태 처리
+                if isinstance(raw_content, list):
+                    content = ""
+                    for item in raw_content:
+                        if isinstance(item, dict) and item.get("type") == "text":
+                            content += item.get("text", "")
+                else:
+                    content = raw_content
+
                 if content:
                     full_response += content
                     yield f"data: {json.dumps({'content': content, 'done': False, 'session_id': _session_id}, ensure_ascii=False)}\n\n"
@@ -1069,7 +1080,17 @@ async def send_message_guest(request: ChatRequest):
             full_response = ""
 
             async for chunk in llm.astream(messages):
-                content = chunk.content if hasattr(chunk, 'content') else str(chunk)
+                raw_content = chunk.content if hasattr(chunk, 'content') else str(chunk)
+
+                # Gemini 3 Flash의 리스트 형식 응답 처리
+                if isinstance(raw_content, list):
+                    content = ""
+                    for item in raw_content:
+                        if isinstance(item, dict) and item.get("type") == "text":
+                            content += item.get("text", "")
+                else:
+                    content = raw_content
+
                 if content:
                     full_response += content
                     yield f"data: {json.dumps({'content': content, 'done': False}, ensure_ascii=False)}\n\n"

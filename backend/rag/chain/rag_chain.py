@@ -1,6 +1,8 @@
 """
 RAG 체인 모듈
 검색 결과를 바탕으로 LLM 응답 생성
+
+v1.6: llm_factory를 사용하여 환경변수 기반 LLM 선택 지원
 """
 
 from dataclasses import dataclass, field
@@ -8,6 +10,10 @@ from typing import Optional, AsyncIterator
 import httpx
 
 from rag.retriever import HierarchicalRetriever, RetrievalResult, RetrievalConfig
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+
+# llm_factory import
+from llm_factory import get_llm
 
 
 @dataclass
@@ -44,7 +50,7 @@ class RAGChain:
 2. 수치/데이터는 단위와 함께 정확히 인용
 3. 테이블에서 조건에 맞는 모든 항목 나열
 4. 차트/그래프 분석 내용 활용
-5. 출처(문서명, 페이지) 명시
+5. 출처나 참고 문서는 별도로 언급하지 마세요. UI에서 자동으로 표시됩니다.
 
 ## 답변 스타일
 - 전문 용어는 쉬운 말로 풀어서 설명하세요.
@@ -62,15 +68,13 @@ class RAGChain:
 ## 응답 포맷
 - 제목은 **굵은 글씨**로 표시하세요.
 - 여러 항목은 번호(1. 2. 3.)나 글머리 기호(-)로 정리하세요.
-- 복잡한 비교는 표로 정리해서 보여주세요.
-
-답변 마지막에 참고 문서명을 간단히 안내해주세요."""
+- 복잡한 비교는 표로 정리해서 보여주세요."""
 
     def __init__(
         self,
         retriever: HierarchicalRetriever,
         api_key: str,
-        model: str = "gpt-5.2",
+        model: str = "gpt-5-mini",
         temperature: float = 0.3,
         max_tokens: int = 2000,
     ):
@@ -177,17 +181,18 @@ class RAGChain:
         context: str,
         conversation_history: Optional[list[ChatMessage]] = None,
     ) -> str:
-        """LLM으로 답변 생성"""
-        messages = [
-            {"role": "system", "content": self.SYSTEM_PROMPT},
-        ]
+        """LLM으로 답변 생성 (llm_factory 사용)"""
+        # LangChain 메시지 형식으로 변환
+        chat_messages = [SystemMessage(content=self.SYSTEM_PROMPT)]
 
         if conversation_history:
             for msg in conversation_history[-6:]:
-                messages.append({
-                    "role": msg.role,
-                    "content": msg.content,
-                })
+                if msg.role == "user":
+                    chat_messages.append(HumanMessage(content=msg.content))
+                elif msg.role == "assistant":
+                    chat_messages.append(AIMessage(content=msg.content))
+                elif msg.role == "system":
+                    chat_messages.append(SystemMessage(content=msg.content))
 
         user_message = f"""다음 컨텍스트를 참고하여 질문에 답변해주세요.
 
@@ -197,34 +202,27 @@ class RAGChain:
 ## 질문
 {query}"""
 
-        messages.append({"role": "user", "content": user_message})
+        chat_messages.append(HumanMessage(content=user_message))
 
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
+        # llm_factory를 사용하여 LLM 인스턴스 생성 (환경변수 기반)
+        user_settings = {
+            "model_provider": "default",  # 환경변수 LLM_PROVIDER, LLM_MODEL 사용
+            "temperature": self.temperature
         }
+        llm = get_llm(user_settings)
 
-        payload = {
-            "model": self.model,
-            "messages": messages,
-            "temperature": self.temperature,
-            "max_completion_tokens": self.max_tokens,
-        }
+        # 동기 호출
+        response = await llm.ainvoke(chat_messages)
+        raw_content = response.content if hasattr(response, 'content') else str(response)
 
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(
-                self.api_url,
-                headers=headers,
-                json=payload,
-            )
-
-        if response.status_code != 200:
-            raise Exception(
-                f"OpenAI API 오류: {response.status_code} - {response.text}"
-            )
-
-        result = response.json()
-        return result["choices"][0]["message"]["content"]
+        # Gemini 3 Flash의 리스트 형식 응답 처리
+        if isinstance(raw_content, list):
+            content = ""
+            for item in raw_content:
+                if isinstance(item, dict) and item.get("type") == "text":
+                    content += item.get("text", "")
+            return content
+        return raw_content
 
     async def _generate_answer_stream(
         self,
@@ -232,17 +230,18 @@ class RAGChain:
         context: str,
         conversation_history: Optional[list[ChatMessage]] = None,
     ) -> AsyncIterator[str]:
-        """LLM으로 스트리밍 답변 생성"""
-        messages = [
-            {"role": "system", "content": self.SYSTEM_PROMPT},
-        ]
+        """LLM으로 스트리밍 답변 생성 (llm_factory 사용)"""
+        # LangChain 메시지 형식으로 변환
+        chat_messages = [SystemMessage(content=self.SYSTEM_PROMPT)]
 
         if conversation_history:
             for msg in conversation_history[-6:]:
-                messages.append({
-                    "role": msg.role,
-                    "content": msg.content,
-                })
+                if msg.role == "user":
+                    chat_messages.append(HumanMessage(content=msg.content))
+                elif msg.role == "assistant":
+                    chat_messages.append(AIMessage(content=msg.content))
+                elif msg.role == "system":
+                    chat_messages.append(SystemMessage(content=msg.content))
 
         user_message = f"""다음 컨텍스트를 참고하여 질문에 답변해주세요.
 
@@ -252,39 +251,27 @@ class RAGChain:
 ## 질문
 {query}"""
 
-        messages.append({"role": "user", "content": user_message})
+        chat_messages.append(HumanMessage(content=user_message))
 
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json",
+        # llm_factory를 사용하여 LLM 인스턴스 생성 (환경변수 기반)
+        user_settings = {
+            "model_provider": "default",  # 환경변수 LLM_PROVIDER, LLM_MODEL 사용
+            "temperature": self.temperature
         }
+        llm = get_llm(user_settings)
 
-        payload = {
-            "model": self.model,
-            "messages": messages,
-            "temperature": self.temperature,
-            "max_completion_tokens": self.max_tokens,
-            "stream": True,
-        }
+        # 스트리밍 응답 생성
+        async for chunk in llm.astream(chat_messages):
+            raw_content = chunk.content if hasattr(chunk, 'content') else str(chunk)
 
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            async with client.stream(
-                "POST",
-                self.api_url,
-                headers=headers,
-                json=payload,
-            ) as response:
-                async for line in response.aiter_lines():
-                    if line.startswith("data: "):
-                        data = line[6:]
-                        if data == "[DONE]":
-                            break
-                        try:
-                            import json
-                            chunk = json.loads(data)
-                            delta = chunk["choices"][0].get("delta", {})
-                            content = delta.get("content", "")
-                            if content:
-                                yield content
-                        except (json.JSONDecodeError, KeyError, IndexError):
-                            continue
+            # Gemini 3 Flash의 리스트 형식 응답 처리
+            if isinstance(raw_content, list):
+                content = ""
+                for item in raw_content:
+                    if isinstance(item, dict) and item.get("type") == "text":
+                        content += item.get("text", "")
+            else:
+                content = raw_content
+
+            if content:
+                yield content

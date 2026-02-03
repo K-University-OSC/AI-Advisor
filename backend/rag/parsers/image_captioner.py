@@ -238,6 +238,146 @@ class OpenAIImageCaptioner(ImageCaptioner):
             return {}
 
 
+class GeminiImageCaptioner(ImageCaptioner):
+    """Gemini Vision 기반 캡셔너 (GPT-4o 대안)"""
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "gemini-3-flash-preview",
+    ):
+        self.api_key = api_key
+        self.model = model
+        self.api_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+
+    async def caption(
+        self,
+        image_data: bytes,
+        context: Optional[str] = None,
+    ) -> str:
+        """이미지를 설명하는 텍스트 생성"""
+        base64_image = base64.b64encode(image_data).decode("utf-8")
+
+        system_prompt = """당신은 문서에서 추출한 이미지와 차트를 분석하는 전문가입니다.
+주어진 이미지를 분석하고 다음 형식으로 상세히 설명해주세요:
+
+1. **유형**: 차트/그래프/표/다이어그램/플로우차트/인포그래픽 중 무엇인지
+2. **제목**: 이미지에 표시된 제목 (정확히 기재)
+3. **주요 내용**:
+   - 모든 텍스트를 정확히 추출 (법률명, 기관명, 용어 등)
+   - 구조화된 정보가 있다면 번호를 매겨 나열 (예: 4가지 요인, 3단계 등)
+   - 핵심 데이터와 수치를 구체적으로 나열
+   - 항목별 값과 단위를 명확히 기재
+   - 화살표/연결선이 있다면 관계와 흐름 설명
+4. **상세 설명**:
+   - 각 항목의 세부 내용 (박스 안 텍스트 전체 추출)
+   - 범례, 주석, 출처 등 부가 정보
+5. **키워드**: 검색에 도움될 핵심 키워드 10-15개 (고유명사, 전문용어 포함)
+
+중요: 이미지 내 모든 텍스트를 빠짐없이 추출하세요. 특히 법률명, 기관명, 조직명, 전문용어는 정확히 기재해야 합니다."""
+
+        user_text = "아래 이미지를 분석해주세요."
+        if context:
+            user_text = f"문서 컨텍스트: {context}\n\n위 컨텍스트를 참고하여 아래 이미지를 분석해주세요."
+
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": system_prompt + "\n\n" + user_text},
+                        {
+                            "inline_data": {
+                                "mime_type": "image/png",
+                                "data": base64_image
+                            }
+                        }
+                    ]
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0.2,
+                "maxOutputTokens": 2500,
+            }
+        }
+
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            response = await client.post(
+                f"{self.api_url}?key={self.api_key}",
+                headers={"Content-Type": "application/json"},
+                json=payload,
+            )
+
+        if response.status_code != 200:
+            raise Exception(
+                f"Gemini API 오류: {response.status_code} - {response.text}"
+            )
+
+        result = response.json()
+        try:
+            return result["candidates"][0]["content"]["parts"][0]["text"]
+        except (KeyError, IndexError):
+            raise Exception(f"Gemini 응답 파싱 오류: {result}")
+
+    async def caption_element(
+        self,
+        element: ParsedElement,
+        context: Optional[str] = None,
+    ) -> CaptionResult:
+        """ParsedElement의 이미지를 캡셔닝"""
+        if not element.image_data:
+            raise ValueError(f"요소 {element.element_id}에 이미지 데이터가 없습니다.")
+
+        caption = await self.caption(element.image_data, context)
+
+        # 간단한 요약 생성 (Gemini로)
+        summary = await self._generate_summary(caption)
+
+        return CaptionResult(
+            element_id=element.element_id,
+            original_content=element.content,
+            caption=caption,
+            summary=summary,
+            key_values={},  # Gemini는 JSON 모드 제한적
+            metadata={
+                "model": self.model,
+                "element_type": element.element_type.value,
+                "page": element.page,
+            },
+        )
+
+    async def _generate_summary(self, caption: str) -> str:
+        """캡션에서 핵심 요약 생성"""
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": f"다음 차트/그래프 분석 내용을 1-2문장으로 핵심만 요약해주세요:\n\n{caption}"}
+                    ]
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0.1,
+                "maxOutputTokens": 200,
+            }
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    f"{self.api_url}?key={self.api_key}",
+                    headers={"Content-Type": "application/json"},
+                    json=payload,
+                )
+
+            if response.status_code != 200:
+                return caption[:200]
+
+            result = response.json()
+            return result["candidates"][0]["content"]["parts"][0]["text"]
+        except Exception:
+            return caption[:200]
+
+
 class BatchImageCaptioner:
     """여러 이미지를 배치로 캡셔닝"""
 

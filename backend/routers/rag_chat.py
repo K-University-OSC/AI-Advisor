@@ -44,8 +44,8 @@ router = APIRouter()
 # RAG 시스템 싱글톤
 _rag_system = None  # 단일 RAG 시스템
 
-# 기본 컬렉션 (레거시 호환)
-MH_RAG_COLLECTION = "mh_rag_finance_v7_6_azure"
+# 기본 컬렉션 (환경변수 우선, 레거시 호환)
+MH_RAG_COLLECTION = os.getenv("QDRANT_COLLECTION_NAME", "advisor_osc_finance_gemini_embed")
 
 # ============================================================================
 # 이미지 분석 (Vision API)
@@ -436,6 +436,18 @@ async def send_rag_message(request: RAGChatRequest, current_user: dict = Depends
             # PDF 하이라이트 모듈의 키워드 추출기 사용
             keywords_str = get_keywords_string(_user_query)
 
+            # DB에서 filename → original_filename 매핑 조회 (displayName용)
+            filename_mapping = {}
+            try:
+                async with get_db() as session:
+                    result = await session.execute(
+                        text("SELECT filename, original_filename FROM rag_documents")
+                    )
+                    for row in result.mappings():
+                        filename_mapping[row["filename"]] = row["original_filename"]
+            except Exception as e:
+                logger.warning(f"Failed to load filename mapping: {e}")
+
             sources = []
             if search_result.sources:
                 # 점수 기반 필터링: 관련도 낮은 문서 제외
@@ -443,16 +455,20 @@ async def send_rag_message(request: RAGChatRequest, current_user: dict = Depends
                 for idx, s in enumerate(search_result.sources[:5]):  # 최대 5개 검토
                     if isinstance(s, dict):
                         score = s.get("score", 0.0)
+                        source_filename = s.get("source", "")
                         source_info = {
-                            "source": s.get("source", ""),
+                            "source": source_filename,
+                            "displayName": filename_mapping.get(source_filename, source_filename),
                             "page": s.get("page", 0),
                             "score": score,
                             "keywords": keywords_str
                         }
                     else:
                         score = s.score
+                        source_filename = s.source
                         source_info = {
-                            "source": s.source,
+                            "source": source_filename,
+                            "displayName": filename_mapping.get(source_filename, source_filename),
                             "page": s.page,
                             "score": score,
                             "keywords": keywords_str
@@ -462,10 +478,11 @@ async def send_rag_message(request: RAGChatRequest, current_user: dict = Depends
                     if top_score is None:
                         top_score = score
 
-                    # 필터링 조건:
-                    # 1. 절대 점수 0.5 이상
-                    # 2. 1위 점수 대비 80% 이상
-                    if score >= 0.5 and (top_score == 0 or score >= top_score * 0.8):
+                    # 필터링 조건 (v1.6: Gemini Embedding + Cohere Reranker 점수 범위 조정)
+                    # Cohere Reranker 점수는 0~1 범위, 일반적으로 0.1~0.5 사이
+                    # 1. 절대 점수 0.05 이상 (매우 관련 없는 문서 제외)
+                    # 2. 1위 점수 대비 50% 이상
+                    if score >= 0.05 and (top_score == 0 or score >= top_score * 0.5):
                         sources.append(source_info)
                         if len(sources) >= 3:  # 최대 3개
                             break
@@ -682,7 +699,7 @@ async def get_pdf_pages(
     → 37, 38, 39 페이지만 추출하고 "검색어"를 하이라이트하여 전송
 
     Args:
-        domain: PDF 도메인 (finance, medical 등)
+        domain: PDF 도메인 (finance, medical, uploads 등)
         filename: PDF 파일명
         page: 중심 페이지 번호 (1-based)
         range_pages: 추출할 총 페이지 수 (기본 3)
@@ -692,14 +709,26 @@ async def get_pdf_pages(
     pdf_base_path = settings.pdf_base_path
     valid_domains = [d.strip() for d in settings.pdf_valid_domains.split(",")]
 
+    # 업로드된 문서 도메인 추가
+    valid_domains.append("uploads")
+
     if domain not in valid_domains:
         raise HTTPException(status_code=400, detail=f"Invalid domain: {domain}")
 
     decoded_filename = urllib.parse.unquote(filename)
-    file_path = os.path.join(pdf_base_path, domain, decoded_filename)
+
+    # 도메인에 따라 파일 경로 결정
+    if domain == "uploads":
+        # 업로드된 문서는 /app/data/documents/ 에서 찾음
+        upload_base = os.getenv("DATA_BASE_PATH", "/app/data")
+        file_path = os.path.join(upload_base, "documents", decoded_filename)
+        base_check_path = upload_base
+    else:
+        file_path = os.path.join(pdf_base_path, domain, decoded_filename)
+        base_check_path = pdf_base_path
 
     real_path = os.path.realpath(file_path)
-    if not real_path.startswith(os.path.realpath(pdf_base_path)):
+    if not real_path.startswith(os.path.realpath(base_check_path)):
         raise HTTPException(status_code=403, detail="Access denied")
 
     if not os.path.exists(file_path):

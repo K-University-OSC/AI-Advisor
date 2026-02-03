@@ -41,27 +41,3 @@ const getApiBaseUrl = () => {
 };
 
 export const API_BASE_URL = getApiBaseUrl();
-
-// 지원하는 LLM 모델 정보
-export const LLM_MODELS = {
-    // OpenAI GPT-5 시리즈
-    'gpt52': { name: 'GPT-5.2', provider: 'OpenAI', description: '최신 GPT 모델' },
-    'gpt5': { name: 'GPT-5', provider: 'OpenAI', description: '코딩 및 에이전트 작업에 최상의 모델' },
-    'gpt5m': { name: 'GPT-5 mini', provider: 'OpenAI', description: '빠르고 저렴한 버전' },
-    'gpt5n': { name: 'GPT-5 nano', provider: 'OpenAI', description: '가장 빠르고 저렴한 버전' },
-
-    // Google
-    'gmn30': { name: 'Gemini 3.0 Pro', provider: 'Google', description: 'Gemini 최신 모델' },
-    'gmn25f': { name: 'Gemini 2.5 Flash', provider: 'Google', description: '빠른 Gemini 모델' },
-
-    // Anthropic
-    'cld45o': { name: 'Claude 4.5 Opus', provider: 'Anthropic', description: 'Claude 최고 성능 모델' },
-    'cld45s': { name: 'Claude 4.5 Sonnet', provider: 'Anthropic', description: 'Claude 균형 잡힌 모델' },
-
-    // Perplexity
-    'pplx': { name: 'Perplexity Sonar', provider: 'Perplexity', description: '실시간 검색 AI' },
-    'pplxp': { name: 'Perplexity Pro', provider: 'Perplexity', description: 'Perplexity Pro' }
-};
-
-// 기본 모델
-export const DEFAULT_MODEL = 'gpt5m';

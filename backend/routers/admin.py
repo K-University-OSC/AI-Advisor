@@ -382,18 +382,34 @@ async def get_admin_dashboard(admin_user: dict = Depends(verify_admin)):
             "tokens_today": usage_row[5]
         }
 
-        # 3. 일별 추이 (최근 14일)
+        # 3. 일별 추이 (최근 30일) - 빈 날도 포함
         daily_trend = await session.execute(text("""
+            WITH date_series AS (
+                SELECT generate_series(
+                    CURRENT_DATE - INTERVAL '29 days',
+                    CURRENT_DATE,
+                    INTERVAL '1 day'
+                )::date as date
+            ),
+            daily_data AS (
+                SELECT
+                    DATE(m.created_at) as date,
+                    COUNT(*) as messages,
+                    COUNT(DISTINCT s.user_id) as users,
+                    COALESCE(SUM(m.tokens_used), 0) as tokens
+                FROM messages m
+                JOIN sessions s ON m.session_id = s.id
+                WHERE m.created_at >= CURRENT_DATE - INTERVAL '29 days'
+                GROUP BY DATE(m.created_at)
+            )
             SELECT
-                DATE(m.created_at) as date,
-                COUNT(*) as messages,
-                COUNT(DISTINCT s.user_id) as users,
-                COALESCE(SUM(m.tokens_used), 0) as tokens
-            FROM messages m
-            JOIN sessions s ON m.session_id = s.id
-            WHERE m.created_at >= CURRENT_DATE - INTERVAL '14 days'
-            GROUP BY DATE(m.created_at)
-            ORDER BY date
+                ds.date,
+                COALESCE(dd.messages, 0) as messages,
+                COALESCE(dd.users, 0) as users,
+                COALESCE(dd.tokens, 0) as tokens
+            FROM date_series ds
+            LEFT JOIN daily_data dd ON ds.date = dd.date
+            ORDER BY ds.date
         """))
         dashboard["daily_trend"] = [
             {
@@ -403,6 +419,45 @@ async def get_admin_dashboard(admin_user: dict = Depends(verify_admin)):
                 "tokens": row[3]
             }
             for row in daily_trend.fetchall()
+        ]
+
+        # 3-2. 월별 사용자 추이 (최근 12개월) - 빈 달도 포함
+        monthly_user_trend = await session.execute(text("""
+            WITH month_series AS (
+                SELECT generate_series(
+                    DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months',
+                    DATE_TRUNC('month', CURRENT_DATE),
+                    INTERVAL '1 month'
+                )::date as month
+            ),
+            monthly_data AS (
+                SELECT
+                    DATE_TRUNC('month', m.created_at)::date as month,
+                    COUNT(DISTINCT s.user_id) as users,
+                    COUNT(*) as messages,
+                    COALESCE(SUM(m.tokens_used), 0) as tokens
+                FROM messages m
+                JOIN sessions s ON m.session_id = s.id
+                WHERE m.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months'
+                GROUP BY DATE_TRUNC('month', m.created_at)
+            )
+            SELECT
+                ms.month,
+                COALESCE(md.users, 0) as users,
+                COALESCE(md.messages, 0) as messages,
+                COALESCE(md.tokens, 0) as tokens
+            FROM month_series ms
+            LEFT JOIN monthly_data md ON ms.month = md.month
+            ORDER BY ms.month
+        """))
+        dashboard["monthly_user_trend"] = [
+            {
+                "month": str(row[0])[:7],  # YYYY-MM 형식
+                "users": row[1],
+                "messages": row[2],
+                "tokens": row[3]
+            }
+            for row in monthly_user_trend.fetchall()
         ]
 
         # 4. 최근 활동 사용자 (최근 7일 기준)
@@ -644,6 +699,7 @@ async def get_costs(
         "by_model": [],
         "by_user": [],
         "daily_costs": [],
+        "monthly_costs": [],
         "pricing_info": get_pricing_summary()
     }
 
@@ -768,6 +824,54 @@ async def get_costs(
             day = daily_data[date_str]
             day["cost_usd"] = round(day["cost_usd"], 4)
             costs["daily_costs"].append(day)
+
+        # 월별 비용 (최근 12개월) - 빈 달도 포함
+        monthly_usage = await session.execute(text("""
+            WITH month_series AS (
+                SELECT generate_series(
+                    DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months',
+                    DATE_TRUNC('month', CURRENT_DATE),
+                    INTERVAL '1 month'
+                )::date as month
+            ),
+            monthly_data AS (
+                SELECT
+                    DATE_TRUNC('month', created_at)::date as month,
+                    COALESCE(SUM(CASE WHEN role = 'user' THEN tokens_used ELSE 0 END), 0) as input_tokens,
+                    COALESCE(SUM(CASE WHEN role = 'assistant' THEN tokens_used ELSE 0 END), 0) as output_tokens,
+                    COUNT(*) as messages
+                FROM messages
+                WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months'
+                GROUP BY DATE_TRUNC('month', created_at)
+            )
+            SELECT
+                ms.month,
+                COALESCE(md.input_tokens, 0) as input_tokens,
+                COALESCE(md.output_tokens, 0) as output_tokens,
+                COALESCE(md.messages, 0) as messages
+            FROM month_series ms
+            LEFT JOIN monthly_data md ON ms.month = md.month
+            ORDER BY ms.month
+        """))
+
+        # 월별로 집계
+        for row in monthly_usage.fetchall():
+            month_str = str(row[0])[:7]  # YYYY-MM 형식
+            input_tokens = int(row[1])
+            output_tokens = int(row[2])
+            messages = int(row[3])
+
+            # 비용 계산 (간단히 전체 토큰 기준)
+            cost = calculate_cost("unknown", input_tokens, output_tokens) if (input_tokens > 0 or output_tokens > 0) else 0
+
+            costs["monthly_costs"].append({
+                "month": month_str,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "total_tokens": input_tokens + output_tokens,
+                "messages": messages,
+                "cost_usd": round(cost, 4)
+            })
 
     return costs
 

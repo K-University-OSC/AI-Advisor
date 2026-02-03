@@ -1,6 +1,7 @@
 from .embedding_service import (
     EmbeddingService,
     OpenAIEmbeddingService,
+    GeminiEmbeddingService,
     SparseEmbeddingService,
     MultimodalEmbeddingService,
 )
@@ -8,6 +9,7 @@ from .embedding_service import (
 __all__ = [
     "EmbeddingService",
     "OpenAIEmbeddingService",
+    "GeminiEmbeddingService",
     "SparseEmbeddingService",
     "MultimodalEmbeddingService",
 ]

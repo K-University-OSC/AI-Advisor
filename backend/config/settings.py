@@ -49,7 +49,7 @@ class ProvidersConfig:
     """Provider 설정 - personalization_core 호환"""
     # LLM Provider
     llm_provider: str = os.getenv("LLM_PROVIDER", "openai")
-    llm_model: str = os.getenv("LLM_MODEL", "gpt5")
+    llm_model: str = os.getenv("LLM_MODEL", "gpt-5-mini")
 
     # Embedding Provider
     embedding_provider: str = os.getenv("EMBEDDING_PROVIDER", "openai")
@@ -60,12 +60,13 @@ class ProvidersConfig:
     qdrant_host: str = os.getenv("QDRANT_HOST", "localhost")
     qdrant_port: int = int(os.getenv("QDRANT_PORT", "6333"))
 
-    # Reranker Provider
-    reranker_provider: str = os.getenv("RERANKER_PROVIDER", "bge")
+    # Reranker Provider (V8: Cohere 사용)
+    reranker_provider: str = os.getenv("RERANKER_PROVIDER", "cohere")
     bge_reranker_model: str = os.getenv("BGE_RERANKER_MODEL", "BAAI/bge-reranker-v2-m3")
 
-    # Query Expansion
-    query_expansion_model: str = os.getenv("QUERY_EXPANSION_MODEL", "gpt5-mini")
+    # Query Expansion (Gemini 사용)
+    query_expansion_provider: str = os.getenv("QUERY_EXPANSION_PROVIDER", "google")
+    query_expansion_model: str = os.getenv("QUERY_EXPANSION_MODEL", "gemini-3-flash-preview")
 
 
 class Settings(BaseSettings):
@@ -84,12 +85,12 @@ class Settings(BaseSettings):
         env="QDRANT_COLLECTION_NAME"
     )
 
-    # Model Settings (Baseline V1: gpt-4o + text-embedding-3-large)
+    # Model Settings (V8: gpt-4o-mini + text-embedding-3-large)
     embedding_model: str = Field(
         default="text-embedding-3-large",
         env="EMBEDDING_MODEL"
     )
-    llm_model: str = Field(default="gpt-5.2", env="LLM_MODEL")
+    llm_model: str = Field(default="gpt-5-mini", env="LLM_MODEL")
     vlm_model: str = Field(default="gpt-4o", env="VLM_MODEL")
 
     # Chunking Settings

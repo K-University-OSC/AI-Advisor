@@ -1,7 +1,8 @@
 """
-BGE Reranker Provider (로컬 모델)
+BGE Reranker Provider (로컬 모델, GPU 지원)
 """
 
+import os
 import logging
 import asyncio
 from typing import List
@@ -15,29 +16,50 @@ class BGERerankerProvider(BaseRerankerProvider):
     """
     BGE Reranker Provider
 
-    로컬에서 실행되는 무료 Reranker 모델
+    로컬에서 실행되는 무료 Reranker 모델 (GPU 지원)
 
     지원 모델:
         - BAAI/bge-reranker-v2-m3 (기본, 다국어)
         - BAAI/bge-reranker-large
+
+    환경변수:
+        - BGE_DEVICE: cuda 또는 cpu (기본: cpu)
+        - BGE_USE_FP16: true/false (기본: true)
     """
 
     def __init__(self, model: str = "BAAI/bge-reranker-v2-m3", **kwargs):
         super().__init__(**kwargs)
         self.model_name = model
         self._model = None
+        # 환경변수에서 설정 로드
+        self.device = os.getenv("BGE_DEVICE", "cpu").lower()
+        self.use_fp16 = os.getenv("BGE_USE_FP16", "true").lower() == "true"
 
     @property
     def provider_name(self) -> str:
         return "bge"
 
     def _load_model(self):
-        """모델 로드 (Lazy Loading)"""
+        """모델 로드 (Lazy Loading, FlagEmbedding 1.3+ devices 파라미터 사용)"""
         if self._model is None:
             try:
                 from FlagEmbedding import FlagReranker
-                self._model = FlagReranker(self.model_name, use_fp16=True)
-                logger.info(f"BGE Reranker 로드 완료: {self.model_name}")
+
+                # FlagEmbedding 1.3+ 버전에서는 devices 파라미터 사용
+                if self.device == "cuda":
+                    self._model = FlagReranker(
+                        self.model_name,
+                        use_fp16=self.use_fp16,
+                        devices=["cuda:0"]  # GPU 0번 사용
+                    )
+                    logger.info(f"BGE Reranker 로드 완료 (GPU): {self.model_name}")
+                else:
+                    self._model = FlagReranker(
+                        self.model_name,
+                        use_fp16=self.use_fp16,
+                        devices=["cpu"]
+                    )
+                    logger.info(f"BGE Reranker 로드 완료 (CPU): {self.model_name}")
             except ImportError:
                 raise ImportError("FlagEmbedding 패키지가 필요합니다: pip install FlagEmbedding")
         return self._model
