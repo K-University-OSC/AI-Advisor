@@ -5,9 +5,9 @@ from .document_parser import (
     ElementType,
     BoundingBox,
 )
-from .upstage_parser import UpstageDocumentParser
 from .pymupdf_parser import PyMuPDFParser
 from .gemini_ocr_parser import GeminiOCRParser
+from .gpt4o_ocr_parser import GPT4oOCRParser
 from .docling_parser import DoclingParser
 from .parser_factory import get_document_parser, list_available_parsers, PARSER_INFO
 from .image_captioner import (
@@ -31,9 +31,9 @@ __all__ = [
     "PARSER_INFO",
     # 개별 파서
     "GeminiOCRParser",
+    "GPT4oOCRParser",
     "DoclingParser",
     "PyMuPDFParser",
-    "UpstageDocumentParser",
     # 이미지 캡셔너
     "ImageCaptioner",
     "OpenAIImageCaptioner",

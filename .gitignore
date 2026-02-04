@@ -68,3 +68,16 @@ credentials.json
 secrets.json
 *.db-shm
 *.db-wal
+
+# Access info and deployment scripts (sensitive)
+advisor_*.md
+auto_recovery.sh
+
+# User uploaded documents
+backend/data/documents/
+backend/uploads/
+
+# Evaluation data (test files)
+backend/eval/allganize/.env
+backend/eval/allganize/files/
+backend/eval/allganize/dataset/

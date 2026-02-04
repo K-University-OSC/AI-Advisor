@@ -1,0 +1,128 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: advisor-osc-isolation
+  namespace: advisor-osc
+spec:
+  # 모든 Pod에 적용
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # 같은 namespace 내부에서 접근 허용
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              project: advisor-osc
+
+    # Ingress Controller에서 접근 허용
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 8000
+
+  egress:
+    # 같은 namespace 내부로 통신 허용
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              project: advisor-osc
+
+    # DNS 허용 (kube-system namespace)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # 외부 API 호출 허용 (OpenAI, Cohere 등)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+
+---
+# 데이터베이스 접근 제한 (Backend만 허용)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-access
+  namespace: advisor-osc
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: backend
+      ports:
+        - protocol: TCP
+          port: 5432
+
+---
+# Redis 접근 제한 (Backend만 허용)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-access
+  namespace: advisor-osc
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: backend
+      ports:
+        - protocol: TCP
+          port: 6379
+
+---
+# Qdrant 접근 제한 (Backend만 허용)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: qdrant-access
+  namespace: advisor-osc
+spec:
+  podSelector:
+    matchLabels:
+      app: qdrant
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: backend
+      ports:
+        - protocol: TCP
+          port: 6333

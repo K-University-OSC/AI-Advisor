@@ -75,11 +75,9 @@ def _ensure_providers_registered():
     if not _PROVIDER_REGISTRY:
         # Lazy import로 순환 참조 방지
         from providers.llm.openai_provider import OpenAIProvider
-        from providers.llm.claude_provider import ClaudeProvider
         from providers.llm.google_provider import GoogleProvider
 
         _PROVIDER_REGISTRY["openai"] = OpenAIProvider
-        _PROVIDER_REGISTRY["claude"] = ClaudeProvider
         _PROVIDER_REGISTRY["google"] = GoogleProvider
 
 
@@ -104,7 +102,7 @@ def get_llm_provider(
         provider = get_llm_provider()
 
         # 특정 Provider 지정
-        provider = get_llm_provider("claude", "claude-sonnet-4-20250514")
+        provider = get_llm_provider("openai", "gpt-4o")
     """
     _ensure_providers_registered()
 

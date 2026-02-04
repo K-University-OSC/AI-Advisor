@@ -3,10 +3,14 @@
 # =============================================================================
 #
 # 사용법:
-#   시작:    docker compose up -d
-#   중지:    docker compose down
-#   로그:    docker compose logs -f
-#   재빌드:  docker compose up -d --build
+#   1. .env 파일 생성 (docker-compose.yml과 같은 디렉토리):
+#      POSTGRES_PASSWORD=your_secure_password_here
+#      SERVER_HOST=your.server.ip.or.domain
+#
+#   2. 시작:    docker compose up -d
+#      중지:    docker compose down
+#      로그:    docker compose logs -f
+#      재빌드:  docker compose up -d --build
 #
 # 포트 정보 (OSC 전용 - 완전 격리):
 #   - Frontend:   10310
@@ -16,9 +20,9 @@
 #   - Qdrant:     10314 (localhost only)
 #
 # 접속 방법:
-#   - Frontend: http://220.66.157.70:10310
-#   - Admin:    http://220.66.157.70:10310/admin-login
-#   - API Docs: http://220.66.157.70:10311/docs
+#   - Frontend: http://${SERVER_HOST}:10310
+#   - Admin:    http://${SERVER_HOST}:10310/admin-login
+#   - API Docs: http://${SERVER_HOST}:10311/docs
 #
 # =============================================================================
 
@@ -31,7 +35,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=http://220.66.157.70:10311
+        - REACT_APP_API_URL=http://${SERVER_HOST:-localhost}:10311
     container_name: advisor-osc-frontend
     restart: unless-stopped
     ports:
@@ -62,7 +66,7 @@ services:
     env_file:
       - ./backend/.env.docker
     environment:
-      - DATABASE_URL=postgresql+asyncpg://advisor:***REMOVED***@postgres:5432/advisor_osc_db
+      - DATABASE_URL=postgresql+asyncpg://advisor:${POSTGRES_PASSWORD:-change_me_in_production}@postgres:5432/advisor_osc_db
       - REDIS_URL=redis://redis:6379/0
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
@@ -106,7 +110,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: advisor
-      POSTGRES_PASSWORD: ***REMOVED***
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_in_production}
       POSTGRES_DB: advisor_osc_db
     volumes:
       - advisor-osc-postgres-data:/var/lib/postgresql/data

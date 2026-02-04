@@ -22,7 +22,7 @@ from routers import admin
 from routers import data_management
 from routers import error_reports
 from routers import hybrid_v4_chat  # HYBRID_V4 RAG 파이프라인
-import app_config
+from config import SERVER_HOST, SERVER_PORT
 from database import init_db, close_db
 
 # ============ 로깅 설정 ============
@@ -287,8 +287,8 @@ async def health_check():
 
 # ============ 서버 실행 ============
 if __name__ == "__main__":
-    host = app_config.SERVER_HOST
-    port = app_config.SERVER_PORT
+    host = SERVER_HOST
+    port = SERVER_PORT
     logger.info(f"Starting server on {host}:{port}")
     uvicorn.run(
         "server:app",

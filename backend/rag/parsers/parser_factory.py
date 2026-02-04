@@ -3,11 +3,10 @@
 문서 파서 팩토리
 
 여러 파서 옵션 지원:
-- gemini: Gemini 3 Flash OCR (기본값, 고품질)
+- gpt4o: GPT-4o Vision OCR (기본값, 고품질)
+- gemini: Gemini 3 Flash OCR (고품질)
 - docling: Docling (IBM 오픈소스, 레이아웃 분석 특화)
 - pymupdf: PyMuPDF4LLM (무료, 빠름)
-- azure: Azure Document Intelligence (유료)
-- pdfplumber: pdfplumber (무료, 테이블 특화)
 """
 
 import os
@@ -16,7 +15,7 @@ from typing import Optional, Literal
 from .document_parser import DocumentParser
 
 
-ParserType = Literal["gemini", "docling", "pymupdf", "azure", "pdfplumber"]
+ParserType = Literal["gemini", "gpt4o", "docling", "pymupdf"]
 
 
 def get_document_parser(
@@ -27,27 +26,35 @@ def get_document_parser(
     문서 파서 인스턴스 생성
 
     Args:
-        parser_type: 파서 타입 (기본값: 환경변수 또는 gemini)
+        parser_type: 파서 타입 (기본값: 환경변수 또는 gpt4o)
+            - "gpt4o": GPT-4o Vision OCR (고품질, v1.6.8 최고 성능)
             - "gemini": Gemini 3 Flash OCR (고품질, OCR Arena 1위)
             - "docling": Docling (IBM 오픈소스, 레이아웃 분석 특화, 무료)
             - "pymupdf": PyMuPDF4LLM (무료, 빠름, 마크다운 지원)
-            - "azure": Azure Document Intelligence (유료, 고품질)
-            - "pdfplumber": pdfplumber (무료, 테이블 특화)
         **kwargs: 파서별 추가 설정
 
     Returns:
         DocumentParser: 문서 파서 인스턴스
 
     Examples:
-        >>> parser = get_document_parser()  # 기본값 (gemini)
+        >>> parser = get_document_parser()  # 기본값 (gpt4o)
         >>> parser = get_document_parser("pymupdf")  # PyMuPDF 사용
         >>> parser = get_document_parser("gemini", model="gemini-3-flash-preview")
     """
     # 환경변수에서 기본값 읽기
     if parser_type is None:
-        parser_type = os.getenv("DOCUMENT_PARSER", "gemini").lower()
+        parser_type = os.getenv("DOCUMENT_PARSER", "gpt4o").lower()
 
-    if parser_type == "gemini":
+    if parser_type == "gpt4o":
+        from .gpt4o_ocr_parser import GPT4oOCRParser
+        return GPT4oOCRParser(
+            api_key=kwargs.get("api_key"),
+            model=kwargs.get("model", "gpt-4o"),
+            dpi=kwargs.get("dpi", 150),
+            ocr_concurrency=kwargs.get("ocr_concurrency", 5),
+        )
+
+    elif parser_type == "gemini":
         from .gemini_ocr_parser import GeminiOCRParser
         return GeminiOCRParser(
             api_key=kwargs.get("api_key"),
@@ -76,33 +83,23 @@ def get_document_parser(
             image_path=kwargs.get("image_path"),
         )
 
-    elif parser_type == "azure":
-        from .azure_document_parser import AzureDocumentParser
-        return AzureDocumentParser(
-            api_key=kwargs.get("api_key"),
-            endpoint=kwargs.get("endpoint"),
-            output_formats=kwargs.get("output_formats"),
-            coordinates=kwargs.get("coordinates", True),
-            ocr=kwargs.get("ocr", True),
-            base64_encoding=kwargs.get("base64_encoding"),
-        )
-
-    elif parser_type == "pdfplumber":
-        from .pdfplumber_parser import PDFPlumberParser
-        return PDFPlumberParser(
-            extract_images=kwargs.get("extract_images", True),
-            extract_tables=kwargs.get("extract_tables", True),
-        )
-
     else:
         raise ValueError(
             f"지원하지 않는 파서 타입: {parser_type}. "
-            f"지원 타입: gemini, docling, pymupdf, azure, pdfplumber"
+            f"지원 타입: gpt4o, gemini, docling, pymupdf"
         )
 
 
 # 파서 정보
 PARSER_INFO = {
+    "gpt4o": {
+        "name": "GPT-4o Vision OCR",
+        "description": "OpenAI GPT-4o Vision 기반 고품질 OCR, v1.6.8 최고 성능",
+        "cost": "유료 ($5/1M 입력 토큰, 약 $0.05/페이지)",
+        "speed": "보통 (1-2s, 병렬 처리)",
+        "features": ["고정밀 OCR", "마크다운", "테이블", "이미지 설명", "병렬 처리"],
+        "accuracy": "finance 테스트 73.3%, image 70%",
+    },
     "gemini": {
         "name": "Gemini 3 Flash OCR",
         "description": "Google Gemini 3 Flash 기반 고품질 OCR, OCR Arena 1위",
@@ -126,20 +123,6 @@ PARSER_INFO = {
         "cost": "무료",
         "speed": "매우 빠름 (0.12s)",
         "features": ["마크다운", "테이블", "이미지", "기본 OCR"],
-    },
-    "azure": {
-        "name": "Azure Document Intelligence",
-        "description": "Microsoft의 고품질 문서 분석 서비스",
-        "cost": "유료 ($1.50/1000페이지)",
-        "speed": "보통 (1-2s)",
-        "features": ["고정밀 OCR", "테이블", "이미지", "레이아웃 분석"],
-    },
-    "pdfplumber": {
-        "name": "pdfplumber",
-        "description": "테이블 추출에 특화된 무료 파서",
-        "cost": "무료",
-        "speed": "빠름 (0.10s)",
-        "features": ["테이블 특화", "좌표 추출", "시각적 디버깅"],
     },
 }
 

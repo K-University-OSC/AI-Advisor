@@ -1,0 +1,101 @@
+# =============================================================================
+# AI Advisor OSC - Docker Compose (테스트 환경)
+# =============================================================================
+#
+# 사용법:
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml up -d
+#   docker compose -f docker-compose.yml -f docker-compose.test.yml run --rm playwright
+#
+# =============================================================================
+
+services:
+  # ==========================================================================
+  # Backend (테스트 설정)
+  # ==========================================================================
+  backend:
+    environment:
+      - TESTING=true
+      - LOG_LEVEL=DEBUG
+      - DATABASE_URL=postgresql+asyncpg://advisor:test_pass@postgres:5432/advisor_test_db
+      - DEFAULT_TENANT=test_tenant
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ==========================================================================
+  # PostgreSQL (테스트 설정)
+  # ==========================================================================
+  postgres:
+    environment:
+      POSTGRES_USER: advisor
+      POSTGRES_PASSWORD: test_pass
+      POSTGRES_DB: advisor_test_db
+
+  # ==========================================================================
+  # Playwright E2E 테스트 실행기
+  # ==========================================================================
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.40.0-focal
+    container_name: advisor-osc-playwright
+    volumes:
+      - ./tests/e2e:/tests
+      - ./tests/e2e/test-results:/tests/test-results
+    working_dir: /tests
+    environment:
+      - BASE_URL=http://frontend:80
+      - API_URL=http://backend:8000
+    command: >
+      sh -c "npm ci && npx playwright test --reporter=html"
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    networks:
+      - advisor-osc-network
+
+  # ==========================================================================
+  # API 테스트 실행기 (pytest)
+  # ==========================================================================
+  api-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: advisor-osc-api-test
+    volumes:
+      - ./tests/api:/tests
+      - ./tests/api/test-results:/tests/test-results
+    working_dir: /tests
+    environment:
+      - BASE_URL=http://backend:8000
+      - TESTING=true
+    command: >
+      sh -c "pip install pytest pytest-asyncio httpx && python -m pytest -v --html=test-results/report.html"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - advisor-osc-network
+
+  # ==========================================================================
+  # 성능 테스트 실행기 (Locust)
+  # ==========================================================================
+  locust:
+    image: locustio/locust:latest
+    container_name: advisor-osc-locust
+    volumes:
+      - ./tests/performance:/mnt/locust
+    ports:
+      - "8089:8089"  # Locust Web UI
+    environment:
+      - LOCUST_HOST=http://backend:8000
+    command: >
+      -f /mnt/locust/locustfile.py --headless -u 50 -r 10 --run-time 1m --html=/mnt/locust/report.html
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - advisor-osc-network

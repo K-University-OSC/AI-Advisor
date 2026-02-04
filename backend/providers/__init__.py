@@ -14,7 +14,6 @@ Provider 패턴 구현
 from providers.llm import get_llm_provider, BaseLLMProvider
 from providers.embedding import get_embedding_provider, BaseEmbeddingProvider
 from providers.vectordb import get_vectordb_provider, BaseVectorDBProvider
-from providers.search import get_search_provider, BaseSearchProvider
 from providers.reranker import get_reranker_provider, BaseRerankerProvider
 
 __all__ = [
@@ -27,9 +26,6 @@ __all__ = [
     # VectorDB
     "get_vectordb_provider",
     "BaseVectorDBProvider",
-    # Search
-    "get_search_provider",
-    "BaseSearchProvider",
     # Reranker
     "get_reranker_provider",
     "BaseRerankerProvider",
