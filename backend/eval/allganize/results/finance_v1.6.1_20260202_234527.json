@@ -1,0 +1,395 @@
+{
+  "version": "v1.6.1",
+  "config": {
+    "parser": "gemini",
+    "vlm": "gemini-2.0-flash",
+    "embedding": "gemini-embedding-001",
+    "llm": "gemini-2.0-flash",
+    "reranker": "cohere"
+  },
+  "collection": "advisor_osc_finance_gemini_full",
+  "timestamp": "20260202_234527",
+  "total": 60,
+  "correct": 54,
+  "accuracy": 90.0,
+  "by_context": {
+    "paragraph": {
+      "correct": 28,
+      "total": 30,
+      "accuracy": 93.33333333333333
+    },
+    "table": {
+      "correct": 8,
+      "total": 10,
+      "accuracy": 80.0
+    },
+    "image": {
+      "correct": 18,
+      "total": 20,
+      "accuracy": 90.0
+    }
+  },
+  "elapsed": 60.69698166847229,
+  "results": [
+    {
+      "idx": 1,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 2,
+      "context_type": "table",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답에 제시된 핵심 정보(비금융주력자 증명 서류, 부실금융기관 관련 책임 없음, 주주구성계획 적합성)를 모두 포함하고 있으며, 의미적으로도 동일한 내용을 전달합니다. 다만, 답변 형식을 좀 더 명확하게 구조화하여 가독성을 높였습니다."
+    },
+    {
+      "idx": 3,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변이 정답과 핵심 내용을 정확히 일치시키고 있으며, 예비인가 불필요 이유에 대한 설명도 정답의 내용을 충분히 반영하고 있습니다. 추가적으로 예비인가 생략 가능 조건과 관련된 정보도 제공하여 답변의 완성도를 높였습니다."
+    },
+    {
+      "idx": 4,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변이 정답과 핵심 정보 및 의미적으로 일치합니다. 은행법 조항 번호만 다를 뿐, 예비인가 신청 가능 여부와 금융위원회의 검토 요건을 정확하게 설명하고 있습니다."
+    },
+    {
+      "idx": 5,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로 동일한 내용을 전달합니다. 추가적으로 브라질과 베트남의 수익률 차이를 계산하여 제공하여 답변의 완성도를 높였습니다."
+    },
+    {
+      "idx": 6,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 7,
+      "context_type": "image",
+      "is_correct": false,
+      "reason": "생성된 답변은 질문에 대한 완전한 답변을 제공하지 않습니다. 질문은 성과 및 주식시장 선호도 *예상 순서*를 묻고 있지만, 생성된 답변은 상반기 *실제 성과*와 3분기 주식 시장 선호도를 부분적으로만 언급하고 있습니다. 또한, 질문에서 요구하는 미국, 중국, 한국 *전체*에 대한 주식시장 선호도 순서를 명확히 제시하지 않습니다."
+    },
+    {
+      "idx": 8,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로 동일한 내용을 전달합니다. 답변 형식이 약간 다르지만, 정보의 정확성과 내용의 일치성을 고려하여 'O'로 판단합니다."
+    },
+    {
+      "idx": 9,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "제시된 답변은 정답과 핵심 정보가 정확히 일치하며, 의미적으로도 동일한 내용을 전달합니다. 다만, 표현 방식이 조금 더 명확하고 구조화되어 있습니다."
+    },
+    {
+      "idx": 10,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하고, 의미적으로 동일한 내용을 전달합니다. 비율 계산 결과도 소수점 둘째 자리에서 반올림하면 동일합니다."
+    },
+    {
+      "idx": 11,
+      "context_type": "image",
+      "is_correct": false,
+      "reason": "생성된 답변은 주어진 정답의 핵심 내용인 '내수 성장 기대' 또는 '미중 무역분쟁 반사이익'을 언급하지 않고, 테이블에 제시된 지표를 바탕으로 추론한 내용을 제시하고 있습니다. 따라서 의미적으로 동일하다고 보기 어렵습니다."
+    },
+    {
+      "idx": 12,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 13,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답과 핵심 정보(상품명, 출시 배경)가 일치하며, 의미적으로도 유사한 내용을 전달합니다. 다만, 생성된 답변은 일본 고령자 세대의 소득 정보 등 구체적인 배경 설명은 생략하고 있습니다."
+    },
+    {
+      "idx": 14,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로도 동일한 내용을 전달합니다. 다만, 생성된 답변이 정답보다 간결하게 요약되어 있습니다."
+    },
+    {
+      "idx": 15,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답의 일부 내용을 포함하고 있으며, 의미적으로도 일치합니다. 연금 가입 기간에 따른 차등 지급을 보완하기 위한 방안 중 하나인 가입 기간 25년 이상 고령자 우선 가산 지급 방안을 언급하고 있습니다."
+    },
+    {
+      "idx": 16,
+      "context_type": "table",
+      "is_correct": true,
+      "reason": "핵심 정보와 의미가 모두 일치합니다."
+    },
+    {
+      "idx": 17,
+      "context_type": "table",
+      "is_correct": true,
+      "reason": "핵심 정보(날짜)가 정확히 일치하고, 법령의 종류와 관련된 정보도 일치하며, 전체적인 의미 또한 동일합니다."
+    },
+    {
+      "idx": 18,
+      "context_type": "table",
+      "is_correct": false,
+      "reason": "생성된 답변은 질문에 대한 정보를 찾을 수 없다고 했지만, 정답은 2005년에 제정된 고령화 대책법을 구체적으로 제시하고 있습니다. 따라서 의미적으로 일치하지 않습니다."
+    },
+    {
+      "idx": 19,
+      "context_type": "table",
+      "is_correct": false,
+      "reason": "제공된 답변은 컨텍스트에 정보가 없다고 주장하지만, 실제 정답은 컨텍스트 32에 명시되어 있다고 합니다. 따라서 답변이 틀렸습니다."
+    },
+    {
+      "idx": 20,
+      "context_type": "table",
+      "is_correct": true,
+      "reason": "핵심 정보와 의미가 정확히 일치합니다."
+    },
+    {
+      "idx": 21,
+      "context_type": "table",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답과 핵심 정보가 정확히 일치하며, 의미적으로도 동일한 내용을 전달합니다. 다만, 정답에 비해 추가적인 정보(근로자의 생애 전반에 걸친 능력 발휘)를 포함하고 있지만, 질문에 대한 답변으로서 적절합니다."
+    },
+    {
+      "idx": 22,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변이 정답과 핵심 정보 및 의미적으로 일치합니다."
+    },
+    {
+      "idx": 23,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보와 의미가 정확히 일치합니다."
+    },
+    {
+      "idx": 24,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답과 핵심 내용을 정확히 포함하고 있으며, 각 원칙별 특징을 잘 설명하고 있습니다. 다만, 정답에 비해 더 자세한 내용을 담고 있어 정보량이 많습니다."
+    },
+    {
+      "idx": 25,
+      "context_type": "table",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 26,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답에 제시된 핵심 내용과 관련된 기관 및 내용을 정확하게 요약하고 있으며, 의미적으로도 동일한 정보를 전달하고 있습니다."
+    },
+    {
+      "idx": 27,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답에 제시된 녹색금융 실행계획의 세 가지 목표와 각 목표를 달성하기 위한 구체적인 계획을 정확하게 요약하고 있습니다. 핵심 정보가 일치하며, 의미적으로도 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 28,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보와 의미가 정확히 일치합니다."
+    },
+    {
+      "idx": 29,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 질문에 대한 정답과 핵심 내용을 정확히 포함하고 있으며, PCAF 기준과 SBTi 활용 과정을 상세하게 설명하여 의미적으로도 일치합니다. 추가적으로 PCAF 기준에 따른 자산별 온실가스 배출량 산정 방식과 탄소중립 이행 과정에서의 리스크 관리 방안을 제시하여 답변의 완성도를 높였습니다."
+    },
+    {
+      "idx": 30,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 31,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보(통화안정증권, RP순매각, 통화안정계정 규모 변화)가 정확히 일치하며, 한국은행의 유동성 조절 대응책과 그 결과로 나타난 지준공급 변화를 의미적으로 동일하게 전달합니다. 추가적으로 유동성 조절 필요 규모 감소 이유를 설명하여 답변의 완성도를 높였습니다."
+    },
+    {
+      "idx": 32,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답에 제시된 핵심 정보를 정확하게 포함하고 있으며, 의미적으로도 동일한 내용을 전달합니다. 다만, 총 대출 한도(50조 원) 정보는 누락되었지만, 질문의 핵심은 '보완된 대출 부대조건'에 대한 설명이므로 정답으로 판단합니다."
+    },
+    {
+      "idx": 33,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답의 핵심 내용을 포함하고 있으며, 추가적으로 자산운용사 선정 기준 및 MMF 자금 변동 대응 방안에 대한 정보를 제공하여 초단기 금리 안정에 기여하는 방식을 더 자세히 설명하고 있습니다. 따라서 의미적으로 일치합니다."
+    },
+    {
+      "idx": 34,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 질문에서 요구하는 RP매매 시 대상증권 배정 방식 개선과 그 효과(운영 리스크 축소, 대상증권 활용도 제고)를 정확하게 설명하고 있습니다. 핵심 내용과 의미가 정답과 일치합니다."
+    },
+    {
+      "idx": 35,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답에 제시된 GDP 성장률 전망치(2.1%)를 정확히 반영하고 있으며, 주요 영향 요인(긍정적/부정적 요인, 부문별 전망)에 대해서도 정답과 의미적으로 일치하는 내용을 포함하고 있습니다. 다만, 생성된 답변은 추가적인 정보(상반기/하반기 성장률, 2023년 성장률 비교, 긍정적/부정적 요인 상세 내용)를 제공하여 정답보다 더 포괄적인 정보를 제공합니다."
+    },
+    {
+      "idx": 36,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 37,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보(882개 정책, 22% 비중)가 일치하고, 의미적으로 동일한 내용을 전달합니다. 총 정책 수에 대한 정보가 추가되었지만, 질문에 대한 답변 자체는 정확합니다."
+    },
+    {
+      "idx": 38,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답과 핵심 내용을 정확히 포함하고 있으며, 의미적으로도 일치합니다. 비은행 금융기관의 수익성 악화, 건설/부동산업의 재무 위험 확대, 시장 불안 요인으로 작용할 가능성을 모두 언급하고 있습니다."
+    },
+    {
+      "idx": 39,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 질문에 대한 핵심 정보를 정확하게 포함하고 있으며, 의미적으로도 정답과 일치합니다. 추가적으로 대차대조표 축소 규모에 대한 정보를 제공하여 답변의 완성도를 높였습니다."
+    },
+    {
+      "idx": 40,
+      "context_type": "paragraph",
+      "is_correct": false,
+      "reason": "생성된 답변은 질문에서 요구하는 본문 내용을 기반으로 하지 않고, 외부 정보를 포함하고 있습니다. 또한, 호주, 캐나다, 스웨덴 외에 미국, ECB, 영국을 추가하여 질문의 범위를 벗어났습니다. 근거에 대한 설명도 본문 내용과 일치하지 않습니다."
+    },
+    {
+      "idx": 41,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보와 의미가 정확히 일치합니다."
+    },
+    {
+      "idx": 42,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변이 정답과 핵심 정보 및 의미적으로 일치합니다."
+    },
+    {
+      "idx": 43,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 질문에서 요구하는 보험업권의 상생금융 과제 특징과 사회적 효과를 구체적인 예시와 함께 잘 설명하고 있으며, 정답에 제시된 핵심 정보(자동차보험료 인하, 상생보험 상품 판매)를 포함하고 있어 의미적으로 일치합니다."
+    },
+    {
+      "idx": 44,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보와 의미가 정확히 일치하며, 질문에 대한 답변을 명확하게 제공하고 있습니다."
+    },
+    {
+      "idx": 45,
+      "context_type": "table",
+      "is_correct": true,
+      "reason": "핵심 정보와 의미가 정확히 일치합니다."
+    },
+    {
+      "idx": 46,
+      "context_type": "table",
+      "is_correct": true,
+      "reason": "생성된 답변은 2024년 중 5,200억원의 절감 효과를 언급하며, 이는 정답에서 제시된 '5,200억원 예상'과 의미적으로 일치합니다. 또한, 지원 실적의 구체적인 내용(자동차보험료 인하 등)을 추가적으로 제공하여 답변의 풍부성을 높였습니다."
+    },
+    {
+      "idx": 47,
+      "context_type": "paragraph",
+      "is_correct": false,
+      "reason": "생성된 답변은 질문에 대한 구체적인 정보를 제공하지 못하고, 정보가 없다고만 언급하고 있습니다. 정답은 금리 인하 범위와 기간을 명확히 제시하고 있어 의미적으로 일치하지 않습니다."
+    },
+    {
+      "idx": 48,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보와 의미가 정확히 일치합니다."
+    },
+    {
+      "idx": 49,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답의 핵심 내용인 '핀테크 스타트업의 성장 촉진'을 포함하며, 추가적으로 핀테크 생태계 확장, 성장 발판 제공, 스케일업 교두보 마련, B2B 협업 모델 창출 지원 등 핀테크 혁신펀드 운용을 통해 기대되는 효과를 구체적으로 설명하고 있어 의미적으로 일치합니다."
+    },
+    {
+      "idx": 50,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로도 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 51,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답에 제시된 핵심 내용을 포함하며, 의미적으로도 일치합니다. 추가적으로 제도 도입 배경에 대한 정보를 제공하여 답변을 풍부하게 만들었습니다."
+    },
+    {
+      "idx": 52,
+      "context_type": "paragraph",
+      "is_correct": true,
+      "reason": "생성된 답변은 퇴직연금제도의 도입 배경과 DB/DC 제도의 영향에 대해 정답과 의미적으로 유사한 내용을 전달하고 있습니다. 다만, 퇴직연금제도의 시작 시점에 대한 정보는 차이가 있습니다. 정답은 1961년 퇴직금제도에서 시작되었다고 언급하는 반면, 생성된 답변은 2005년에 도입되었다고 언급합니다. 하지만 DB/DC 제도에 대한 설명은 정답과 유사합니다."
+    },
+    {
+      "idx": 53,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "질문은 소속 조직을 묻고, 생성된 답변은 소속 조직과 더불어 창립자라는 추가 정보를 제공하지만 핵심 정보인 'IFM Investors'는 일치하므로 의미적으로 동일하다."
+    },
+    {
+      "idx": 54,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "생성된 답변은 정답과 핵심 정보(국가, 금리, 기간)가 정확히 일치하며, 의미적으로도 동일한 내용을 전달합니다. 다만, 10년 만기에서 호주와 네덜란드가 공동 1위라는 점을 명확히 언급하지 않은 점이 약간의 차이점입니다. 하지만 전체적인 정보의 정확성과 의미적 일치성을 고려하여 'O'로 평가합니다."
+    },
+    {
+      "idx": 55,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "생성된 답변은 질문에서 요구하는 모든 기간에 대한 수익률 비교를 정확하게 제공하고 있으며, 정답에서 언급된 산업형 기금의 3년 수익률이 가장 높다는 정보도 포함하고 있습니다. 따라서 의미적으로 일치합니다."
+    },
+    {
+      "idx": 56,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "생성된 답변이 정답과 핵심 정보를 정확히 일치시키고 의미적으로 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 57,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 58,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "표 형식으로 정리하여 가독성을 높였고, 핵심 정보와 의미가 정확히 일치합니다."
+    },
+    {
+      "idx": 59,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "핵심 정보(55.5%)가 일치하고, 의미적으로 동일한 내용을 전달합니다."
+    },
+    {
+      "idx": 60,
+      "context_type": "image",
+      "is_correct": true,
+      "reason": "핵심 정보가 정확히 일치하며, 의미적으로 동일한 내용을 전달합니다. 표 형식으로 정리하여 가독성을 높인 점도 긍정적입니다."
+    }
+  ]
+}

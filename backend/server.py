@@ -21,6 +21,7 @@ from routers import rag_chat
 from routers import admin
 from routers import data_management
 from routers import error_reports
+from routers import hybrid_v4_chat  # HYBRID_V4 RAG 파이프라인
 import app_config
 from database import init_db, close_db
 
@@ -256,6 +257,9 @@ app.include_router(data_management.router, prefix="/api/admin/data", tags=["Data
 
 # 오류 리포트 API
 app.include_router(error_reports.router, prefix="/api/errors", tags=["Error Reports"])
+
+# HYBRID_V4 RAG API (90.9% 정확도, Azure/Upstage 미사용)
+app.include_router(hybrid_v4_chat.router, tags=["HYBRID_V4 RAG"])
 
 
 # ============ 헬스체크 ============

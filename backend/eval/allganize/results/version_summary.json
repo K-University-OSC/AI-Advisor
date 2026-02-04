@@ -1,0 +1,98 @@
+{
+  "project": "Advisor OSC Finance RAG",
+  "test_dataset": "Allganize Finance (60 cases)",
+  "evaluation_method": "LLM-as-Judge (Gemini 3 Flash)",
+  "test_date": "2026-02-01",
+  "versions": {
+    "baseline_v1": {
+      "name": "Azure Document Intelligence",
+      "parser": "azure",
+      "accuracy": 98.33,
+      "correct": 59,
+      "total": 60,
+      "by_context": {
+        "paragraph": {"correct": 30, "total": 30, "accuracy": 100.0},
+        "image": {"correct": 20, "total": 20, "accuracy": 100.0},
+        "table": {"correct": 9, "total": 10, "accuracy": 90.0}
+      },
+      "cost_per_page": 0.01,
+      "result_file": "finance_baseline_v1_azure_20260130.json",
+      "pipeline": {
+        "parser": "Azure Document Intelligence (Layout Model)",
+        "image_captioner": "GPT-4o",
+        "chunker": "Hierarchical (2000/500/50)",
+        "embedding": "text-embedding-3-large",
+        "vector_store": "Qdrant",
+        "retriever": "HierarchicalRetriever (top_k=15, rerank=Cohere)",
+        "llm": "Gemini 3 Flash + GPT-5-mini fallback"
+      }
+    },
+    "v1.2": {
+      "name": "Gemini 3 Flash OCR",
+      "parser": "gemini",
+      "accuracy": 80.0,
+      "correct": 48,
+      "total": 60,
+      "fallback_count": 10,
+      "by_context": {
+        "paragraph": {"correct": 24, "total": 30, "accuracy": 80.0},
+        "image": {"correct": 17, "total": 20, "accuracy": 85.0},
+        "table": {"correct": 7, "total": 10, "accuracy": 70.0}
+      },
+      "indexing_stats": {
+        "total_pages": 301,
+        "total_elements": 2962,
+        "parent_chunks": 582,
+        "child_chunks": 5602
+      },
+      "cost_per_page": 0.01,
+      "result_file": "finance_v1.2_gemini_20260201.json",
+      "pipeline": {
+        "parser": "Gemini 3 Flash OCR",
+        "image_captioner": "GPT-4o",
+        "chunker": "Hierarchical (2000/500/50)",
+        "embedding": "text-embedding-3-large",
+        "vector_store": "Qdrant (advisor_osc_finance_gemini)",
+        "retriever": "HierarchicalRetriever (top_k=15, rerank=Cohere)",
+        "llm": "Gemini 3 Flash + GPT-5-mini fallback"
+      }
+    },
+    "v1.1": {
+      "name": "PyMuPDF (Free)",
+      "parser": "pymupdf",
+      "accuracy": 31.67,
+      "correct": 19,
+      "total": 60,
+      "fallback_count": 27,
+      "by_context": {
+        "paragraph": {"correct": 12, "total": 30, "accuracy": 40.0},
+        "image": {"correct": 6, "total": 20, "accuracy": 30.0},
+        "table": {"correct": 1, "total": 10, "accuracy": 10.0}
+      },
+      "indexing_stats": {
+        "total_pages": 301,
+        "child_chunks": 11288
+      },
+      "cost_per_page": 0.0,
+      "result_file": "finance_v1.1_pymupdf_20260201_072718.json",
+      "pipeline": {
+        "parser": "PyMuPDF4LLM",
+        "image_captioner": "GPT-4o (limited)",
+        "chunker": "Hierarchical (2000/500/50)",
+        "embedding": "text-embedding-3-large",
+        "vector_store": "Qdrant (advisor_osc_finance_pymupdf)",
+        "retriever": "HierarchicalRetriever (top_k=15, rerank=Cohere)",
+        "llm": "Gemini 3 Flash + GPT-5-mini fallback"
+      }
+    }
+  },
+  "comparison": {
+    "accuracy_ranking": ["baseline_v1", "v1.2", "v1.1"],
+    "cost_ranking": ["v1.1", "baseline_v1", "v1.2"],
+    "recommendations": {
+      "production": "baseline_v1 (Azure) - 98.3% accuracy",
+      "cost_sensitive": "v1.2 (Gemini) - 80% accuracy, similar cost to Azure",
+      "free_tier": "Not recommended - v1.1 only 31.7%"
+    }
+  }
+}

@@ -136,7 +136,7 @@ class QueryExpander:
         "동기": ["동기", "인센티브", "유인"],
     }
 
-    def __init__(self, api_key: str, model: str = "gpt-5.2"):
+    def __init__(self, api_key: str, model: str = "gpt-4o"):
         self.api_key = api_key
         self.model = model
         self.api_url = "https://api.openai.com/v1/chat/completions"
@@ -623,7 +623,7 @@ class HyDEGenerator:
     개념적/추상적 질문에 특히 효과적입니다.
     """
 
-    def __init__(self, api_key: str, model: str = "gpt-5.2"):
+    def __init__(self, api_key: str, model: str = "gpt-4o"):
         self.api_key = api_key
         self.model = model
         self.api_url = "https://api.openai.com/v1/chat/completions"
