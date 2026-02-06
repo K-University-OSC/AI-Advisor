@@ -80,6 +80,13 @@ auto_recovery.sh
 backend/data/documents/
 backend/uploads/
 
+# Kubernetes secrets
+k8s/secrets.yaml
+
+# Frontend E2E tests (contains test credentials)
+frontend/e2e/
+frontend/playwright.config.js
+
 # Test & Evaluation
 backend/eval/
 backend/tests/

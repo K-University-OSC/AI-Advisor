@@ -186,7 +186,7 @@ class RAGConfig:
 @dataclass
 class DatabaseConfig:
     """데이터베이스 설정"""
-    url: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://advisor:***REMOVED***@localhost:10312/advisor_osc_db")
+    url: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://advisor:CHANGE_ME@localhost:5432/advisor_osc_db")
     pool_size: int = int(os.getenv("DB_POOL_SIZE", "50"))
     max_overflow: int = int(os.getenv("DB_MAX_OVERFLOW", "100"))
     pool_timeout: int = int(os.getenv("DB_POOL_TIMEOUT", "30"))
