@@ -80,7 +80,11 @@ auto_recovery.sh
 backend/data/documents/
 backend/uploads/
 
-# Evaluation data (test files)
-backend/eval/allganize/.env
-backend/eval/allganize/files/
-backend/eval/allganize/dataset/
+# Test & Evaluation
+backend/eval/
+backend/tests/
+tests/
+test-results/
+testsprite_tests/
+docker-compose.test.yml
+scripts/run-tests.sh
